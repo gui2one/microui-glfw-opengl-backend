@@ -25,6 +25,9 @@ func rasterizeGlyph(font *sfnt.Font, glyph rune, fontSize int) image.Image {
 
 		minY := segs.Bounds().Min.Y.Floor()
 		maxY := segs.Bounds().Max.Y.Ceil()
+
+		glyphHeight := maxY - minY
+		glyphWidth := maxX - minX
 		
 		fmt.Println(minX, maxX, minY, maxY)
     r := vector.NewRasterizer(fontSize, fontSize)
@@ -32,8 +35,8 @@ func rasterizeGlyph(font *sfnt.Font, glyph rune, fontSize int) image.Image {
 	// Simple transform values
 
 	scale := float32(1/ 64.0)
-	offsetX := float32(1)
-	offsetY := float32(50) // baseline
+	offsetX := float32(-minX + 2)
+	offsetY := float32(-minY + 2) // baseline
 
 	for _, seg := range segs {
 		switch seg.Op {
@@ -69,7 +72,8 @@ func rasterizeGlyph(font *sfnt.Font, glyph rune, fontSize int) image.Image {
 		}
 	}
 
-    img := image.NewRGBA(image.Rect(0, 0, fontSize, fontSize))
+	padding := 2
+    img := image.NewRGBA(image.Rect(0, 0, glyphWidth + padding * 2, glyphHeight + padding * 2))
 
 	draw.Draw(img, img.Bounds(), image.Black, image.Point{}, draw.Src)
     r.Draw(img, img.Bounds(), image.White, image.Point{})
@@ -81,7 +85,7 @@ func GenerateAtlas(fontFilePath string) {
     fontFile, _ := os.ReadFile(fontFilePath)
 
     font, _ := sfnt.Parse(fontFile)
-	img := rasterizeGlyph(font, 'L', 64)
+	img := rasterizeGlyph(font, 'A', 64)
 
     finalIMG := image.NewRGBA(image.Rect(0, 0, 640, 480))
 	

@@ -30,7 +30,8 @@ func initMyStuff(){
 func main() {
 
     runtime.LockOSThread()
-    gui2onegl.GenerateAtlas("assets/fonts/ADRIP1.TTF")
+    // gui2onegl.GenerateAtlas("assets/fonts/ADRIP1.TTF")
+    gui2onegl.GenerateAtlas("assets/fonts/ARIAL.TTF")
 
     fmt.Println("OK")
     os.Exit(0) 
