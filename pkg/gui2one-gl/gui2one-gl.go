@@ -9,6 +9,14 @@ import (
 	"github.com/go-gl/gl/v4.6-core/gl"
 )
 
+func InitGL(){
+	
+
+    if gl.Init() != nil {
+        panic("Unable to initialize OpenGL")
+    }
+    SetupGLDebug()
+}
 // App base app structure
 type App struct {
     Square *GlMeshData
