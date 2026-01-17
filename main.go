@@ -9,54 +9,44 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
-
 var myApp gui2onegl.App
 
-
-
-func initMyStuff(){
-
-
-        fmt.Println("hey")
-        
-        myApp.Init()
-        myApp.Square =  &gui2onegl.Square
-        myApp.Square.Init()
-
+func initMyStuff() {
+	fmt.Println("Init App OpenGL Resources")
+	myApp.Init()
+	myApp.Square = &gui2onegl.Square
+	myApp.Square.Init()
 }
-
 
 func main() {
 
-    runtime.LockOSThread()
-    // gui2onegl.GenerateAtlas("assets/fonts/ADRIP1.TTF")
-    gui2onegl.GenerateAtlas("assets/fonts/ARIAL.TTF")
+	runtime.LockOSThread()
+	fmt.Println("Starting App...")
+	atlas := gui2onegl.GenerateAtlas("assets/fonts/ARIAL.TTF", [2]int{0x0020, 0x007E})
 
-    // fmt.Println("OK")
-    // os.Exit(0) 
+	atlas.Print()
 
-    if glfw.Init() != nil {
-        panic("Unable to initialize GLFW")
-    }
+	if glfw.Init() != nil {
+		panic("Unable to initialize GLFW")
+	}
 
-    wnd, err := glfw.CreateWindow(640, 480, "Hello World", nil, nil)
-    if err != nil {
-        panic("Unable to create GLFW window")
-    }
+	wnd, err := glfw.CreateWindow(640, 480, "Hello World", nil, nil)
+	if err != nil {
+		panic("Unable to create GLFW window")
+	}
 
-        wnd.MakeContextCurrent()
+	wnd.MakeContextCurrent()
 
-    gui2onegl.InitGL()
-    initMyStuff()
-    
-    for !wnd.ShouldClose() {
-        // gl.Viewport(0,0,640, 480)
-        gui2onegl.DrawMyStuff(&myApp)
-        wnd.SwapBuffers()
-        glfw.WaitEvents()
-    }
+	gui2onegl.InitGL()
+	initMyStuff()
 
-    glfw.Terminate()
+	for !wnd.ShouldClose() {
 
+		gui2onegl.DrawMyStuff(&myApp)
+		wnd.SwapBuffers()
+		glfw.WaitEvents()
+	}
+
+	glfw.Terminate()
 
 }
