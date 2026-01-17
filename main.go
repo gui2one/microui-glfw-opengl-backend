@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	gui2onegl "font-stuff/pkg/gui2one-gl"
-	"os"
 
 	"runtime"
 
@@ -33,8 +32,8 @@ func main() {
     // gui2onegl.GenerateAtlas("assets/fonts/ADRIP1.TTF")
     gui2onegl.GenerateAtlas("assets/fonts/ARIAL.TTF")
 
-    fmt.Println("OK")
-    os.Exit(0) 
+    // fmt.Println("OK")
+    // os.Exit(0) 
 
     if glfw.Init() != nil {
         panic("Unable to initialize GLFW")

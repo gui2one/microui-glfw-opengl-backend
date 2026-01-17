@@ -6,46 +6,41 @@ import (
 	"image/draw"
 	"image/png"
 	"log"
+	"math"
 	"os"
-	"slices"
+	"path"
 
 	"golang.org/x/image/font/sfnt"
 	"golang.org/x/image/math/fixed"
 	"golang.org/x/image/vector"
-
-	"github.com/depp/skelly64/lib/rectpack"
 )
 
-
 func rasterizeGlyph(font *sfnt.Font, idx sfnt.GlyphIndex, fontSize int) *image.RGBA {
-  buf := new(sfnt.Buffer)
-
-	// idx, _ := font.GlyphIndex(buf,glyph)
-
+  	buf := new(sfnt.Buffer)
 	if idx == 0 {
-		log.Println("ha !!!!!!!!!!!!!!!!!!!!!!")
+		log.Println("glyph not found")
 		return nil
 	}
     segs, _ := font.LoadGlyph(buf,idx, fixed.Int26_6(fontSize << 6), nil)
 
-		minX := segs.Bounds().Min.X.Floor()
-		maxX := segs.Bounds().Max.X.Ceil()
+	minX := segs.Bounds().Min.X.Floor()
+	// maxX := segs.Bounds().Max.X.Ceil()
 
-		minY := segs.Bounds().Min.Y.Floor()
-		maxY := segs.Bounds().Max.Y.Ceil()
+	minY := segs.Bounds().Min.Y.Floor()
+	// maxY := segs.Bounds().Max.Y.Ceil()
 
-		glyphHeight := maxY - minY
-		glyphWidth := maxX - minX
+	// glyphHeight := maxY - minY
+	// glyphWidth := maxX - minX
 
-padding := 2
-w := glyphWidth + padding*2
-h := glyphHeight + padding*2
+	// padding := 2
+	// w := glyphWidth + padding*2
+	// h := glyphHeight + padding*2
 
-r := vector.NewRasterizer(w, h)
+	r := vector.NewRasterizer(fontSize, fontSize)
 	
 	// Simple transform values
 
-	scale := float32(1.0/ 64.0)
+	scale := float32(1.0/ float32(fontSize))
 	offsetX := float32(-minX + 2)
 	offsetY := float32(-minY + 2) // baseline
 
@@ -84,7 +79,7 @@ r := vector.NewRasterizer(w, h)
 	}
 
 
-img := image.NewRGBA(image.Rect(0, 0, w, h))
+	img := image.NewRGBA(image.Rect(0, 0, fontSize, fontSize))
 	draw.Draw(img, img.Bounds(), image.Black, image.Point{}, draw.Src)
     r.Draw(img, img.Bounds(), image.White, image.Point{})
 
@@ -92,58 +87,126 @@ img := image.NewRGBA(image.Rect(0, 0, w, h))
 
 }
 
+
+type GlyphMetrics struct {
+	IDX sfnt.GlyphIndex
+
+	AdvanceX int
+	BearingX int
+	BearingY int
+
+	Width int
+	Height int
+}
+type FontMetrics struct {
+	Ascent int
+	Descent int
+	LineHeight int
+}
+func (m*FontMetrics) Print() {
+	fmt.Println("Font Metrics ---->")
+	fmt.Println("  Ascent :", m.Ascent)
+	fmt.Println("  Descent :", m.Descent)
+	fmt.Println("  LineHeight :", m.LineHeight)
+}
+type AtlasData struct {
+	FontName string
+	Width int
+	Height int
+	Atlas *image.RGBA
+	FontMetrics *FontMetrics
+	Glyphs []*GlyphMetrics
+}
+func (a*AtlasData) Print() {
+	fmt.Println("AtlasData ---->")
+	fmt.Println("  FontName :", a.FontName)
+	fmt.Println("  Width :", a.Width)
+	fmt.Println("  Height :", a.Height)
+
+	a.FontMetrics.Print()
+	// fmt.Println("  Glyphs ---->")
+	// for _, g := range a.Glyphs {
+	// 	fmt.Println("    GlyphMetrics ---->")
+	// 	fmt.Println("      IDX :", g.IDX)
+	// 	fmt.Println("      AdvanceX :", g.AdvanceX)
+	// 	fmt.Println("      BearingX :", g.BearingX)
+	// 	fmt.Println("      BearingY :", g.BearingY)
+	// 	fmt.Println("      Width :", g.Width)
+	// 	fmt.Println("      Height :", g.Height)
+	// }
+}
 func GenerateAtlas(fontFilePath string) {
-    fontFile, _ := os.ReadFile(fontFilePath)
-
+    fontFile, err := os.ReadFile(fontFilePath)
+	if err != nil {
+		log.Println(err)
+		return 
+	}
     font, _ := sfnt.Parse(fontFile)
-
+	fontSize := int(64)
 
 	images := []*image.RGBA{}
-	for i := 66; i < 128; i++ {
+	for i := 0x0020; i < 0x007E; i++ {
 	var buf sfnt.Buffer
 	glyphIndex, err := font.GlyphIndex(&buf, rune(i))
 	if err != nil || glyphIndex == 0 {
 		continue
 	}		
-		img3 := rasterizeGlyph(font, glyphIndex, 64)
+		img3 := rasterizeGlyph(font, glyphIndex, fontSize)
 		if img3 == nil {
 			continue
 		}
 		images = append(images, img3)
 	}
 
-	rectangles := []rectpack.Point{}
 
+
+	finalDIM := int(math.Ceil(math.Sqrt(float64(len(images))))) * fontSize
+	finalIMG := image.NewRGBA(image.Rect(0, 0, int(finalDIM), int(finalDIM)))
+	
+	step := int(fontSize)
+	startX := 0
+	startY := 0
 	for _, img := range images {
-		rectangles = append(rectangles, rectpack.Point{X: int32((*img).Bounds().Dx()), Y: int32((*img).Bounds().Dy())})
+		dstRect := image.Rect(
+			int(startX),
+			int(startY),
+			int(startX)+img.Bounds().Dx(),
+			int(startY)+img.Bounds().Dy(),
+		)		
+		draw.Draw(finalIMG, dstRect, img, image.Point{}, draw.Src)
+		startX += step
+		if startX >= int(finalDIM) {
+			startX = 0
+			startY += step
+		}
 	}
 
-	fmt.Println("rectangles : ", rectangles)
-
-
-
-
-	p := rectpack.New()
-	
-	bounds, pos, err := rectpack.AutoPackSingle(p, rectangles)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	fmt.Println("Bounds : ", bounds)
-	fmt.Println("positions : ", pos)
-
-	// sorting rectangles to match rectpack heuristic ?!
-	slices.SortFunc(rectangles, func(a, b rectpack.Point) int {
-		return int(b.Y - a.Y)
-	})
-fmt.Println("rectangles : ", rectangles)	
-	finalIMG := image.NewRGBA(image.Rect(0, 0, 640, 480))
-	
-	img := images[1]
-    draw.Draw(finalIMG, img.Bounds(), img, image.Point{}, draw.Src)
-	
+	// write file on disk ... for now
     f, _ := os.Create("out.png")
     defer f.Close()
-    png.Encode(f, finalIMG)
+    png.Encode(f, finalIMG)	
+	buf := new(sfnt.Buffer)
+
+	// compute all font/glyphs metrics
+	metrics, _ := font.Metrics(buf, fixed.Int26_6(fontSize<<6), 0)
+	ascent := metrics.Ascent.Ceil()
+	descent := metrics.Descent.Floor()
+	lineHeight := metrics.Height.Ceil()
+
+	fontMetrics := &FontMetrics{
+		Ascent: ascent,
+		Descent: descent,
+		LineHeight: lineHeight,
+	}
+	// fontMetrics.Print()
+
+	atlasData := &AtlasData{
+		FontName: path.Base(fontFilePath),
+		Width: finalDIM,
+		Height: finalDIM,
+		Atlas: finalIMG,
+		FontMetrics: fontMetrics,
+	}
+	atlasData.Print()
+
 }
