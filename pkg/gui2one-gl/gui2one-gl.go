@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/go-gl/gl/v4.6-core/gl"
+	mgl "github.com/go-gl/mathgl/mgl32"
 )
 
 func InitGL() {
@@ -27,7 +28,6 @@ type App struct {
 func (a *App) Init() {
 
 	a.MainShader = generateShader("assets/shaders/main_vertex.glsl", "assets/shaders/main_fragment.glsl")
-
 }
 
 var Square = GlMeshData{
@@ -85,8 +85,9 @@ type glTexture struct {
 }
 
 // DrawMyStuff draws my stuff
-func DrawMyStuff(app *App) {
+func DrawMyStuff(app *App, w, h int) {
 
+	proj := mgl.Ortho2D(0, float32(w)/float32(h), 0, 1.0)
 	gl.ClearColor(0.1, 0.0, 0.0, 1.0)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
@@ -98,6 +99,9 @@ func DrawMyStuff(app *App) {
 
 	loc := gl.GetUniformLocation(app.MainShader, gl.Str("uTexture\x00"))
 	gl.Uniform1i(loc, 0)
+
+	loc = gl.GetUniformLocation(app.MainShader, gl.Str("uProj\x00"))
+	gl.UniformMatrix4fv(loc, 1, false, &proj[0])
 	gl.DrawElements(gl.TRIANGLES, int32(len(app.Square.Indices)), gl.UNSIGNED_INT, nil)
 
 	// gl.UseProgram(0)

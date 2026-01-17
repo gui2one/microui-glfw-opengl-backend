@@ -6,28 +6,38 @@ import (
 
 	"runtime"
 
+	"github.com/go-gl/gl/v4.6-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
 var myApp gui2onegl.App
+var Width = 640
+var Height = 480
 
 func initMyStuff() {
-	texture, err := gui2onegl.LoadImageFile("out.png")
-	if err != nil {
-		fmt.Println(err)
-	}
+
 	fmt.Println("Init App OpenGL Resources")
 	myApp.Init()
 	myApp.Square = &gui2onegl.Square
 	myApp.Square.Init()
-	myApp.AtlasTexture = *texture
+
 }
 
+func handleDrop(wnd *glfw.Window, paths []string) {
+	fmt.Println("Dropped", len(paths), "files")
+	fmt.Println(paths)
+	fmt.Println(myApp.AtlasTexture.Width)
+}
+func handleResize(wnd *glfw.Window, width, height int) {
+	Width = width
+	Height = height
+	gl.Viewport(0, 0, int32(Width), int32(Height))
+}
 func main() {
 
 	runtime.LockOSThread()
 	fmt.Println("Starting App...")
-	atlas := gui2onegl.GenerateAtlas("assets/fonts/ARIAL.TTF", [2]int{0x0020, 0x007E})
+	atlas := gui2onegl.GenerateAtlas("assets/fonts/CONSOLAB.TTF", [2]int{0x0020, 0x007E})
 	// atlas := gui2onegl.GenerateAtlas("assets/fonts/ARIAL.TTF", [2]int{0x0020, 0x0023})
 
 	atlas.Print(false)
@@ -35,8 +45,9 @@ func main() {
 	if glfw.Init() != nil {
 		panic("Unable to initialize GLFW")
 	}
-
-	wnd, err := glfw.CreateWindow(640, 480, "Hello World", nil, nil)
+	wnd, err := glfw.CreateWindow(Width, Height, "Hello World", nil, nil)
+	wnd.SetDropCallback(handleDrop)
+	wnd.SetFramebufferSizeCallback(handleResize)
 	if err != nil {
 		panic("Unable to create GLFW window")
 	}
@@ -44,12 +55,12 @@ func main() {
 	wnd.MakeContextCurrent()
 
 	gui2onegl.InitGL()
-
+	myApp.AtlasTexture = *gui2onegl.FromImage(atlas.Atlas)
 	initMyStuff()
-
+	gl.Viewport(0, 0, int32(Width), int32(Height))
 	for !wnd.ShouldClose() {
 
-		gui2onegl.DrawMyStuff(&myApp)
+		gui2onegl.DrawMyStuff(&myApp, Width, Height)
 		wnd.SwapBuffers()
 		glfw.WaitEvents()
 	}

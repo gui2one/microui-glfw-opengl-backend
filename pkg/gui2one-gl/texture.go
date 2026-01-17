@@ -191,7 +191,18 @@ func LoadImageFile(imgFilePath string) (*Texture, error) {
 	texture := GenerateTexture(w, h, bytes)
 	return texture, err
 }
+func FromImage(img image.Image) *Texture {
+	w, h := img.Bounds().Max.X, img.Bounds().Max.Y
+	bytes := make([]byte, w*h*4)
 
+	for i := 0; i < len(bytes); i += 4 {
+		clr := img.At((i/4)%w, h-((i/4)/w))
+
+		bytes[i+0], bytes[i+1], bytes[i+2], bytes[i+3] = rgbaToPixel(clr.RGBA())
+	}
+
+	return GenerateTexture(w, h, bytes)
+}
 func rgbaToPixel(r uint32, g uint32, b uint32, a uint32) (byte, byte, byte, byte) {
 	return byte(r / 256), byte(g / 256), byte(b / 256), byte(a / 256)
 }

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"image"
 	"image/draw"
-	"image/png"
 	"log"
 	"math"
 	"os"
@@ -235,10 +234,10 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int) *AtlasData {
 		}
 	}
 
-	// write file on disk ... for now
-	f, _ := os.Create("out.png")
-	defer f.Close()
-	png.Encode(f, finalIMG)
+	// // write file on disk ... for now
+	// f, _ := os.Create("out.png")
+	// defer f.Close()
+	// png.Encode(f, finalIMG)
 
 	fontMetrics := getFontMetrics(font, fontSize)
 	// fontMetrics.Print()
