@@ -12,10 +12,15 @@ import (
 var myApp gui2onegl.App
 
 func initMyStuff() {
+	texture, err := gui2onegl.LoadImageFile("out.png")
+	if err != nil {
+		fmt.Println(err)
+	}
 	fmt.Println("Init App OpenGL Resources")
 	myApp.Init()
 	myApp.Square = &gui2onegl.Square
 	myApp.Square.Init()
+	myApp.AtlasTexture = *texture
 }
 
 func main() {
@@ -23,8 +28,9 @@ func main() {
 	runtime.LockOSThread()
 	fmt.Println("Starting App...")
 	atlas := gui2onegl.GenerateAtlas("assets/fonts/ARIAL.TTF", [2]int{0x0020, 0x007E})
+	// atlas := gui2onegl.GenerateAtlas("assets/fonts/ARIAL.TTF", [2]int{0x0020, 0x0023})
 
-	atlas.Print()
+	atlas.Print(false)
 
 	if glfw.Init() != nil {
 		panic("Unable to initialize GLFW")
@@ -38,6 +44,7 @@ func main() {
 	wnd.MakeContextCurrent()
 
 	gui2onegl.InitGL()
+
 	initMyStuff()
 
 	for !wnd.ShouldClose() {

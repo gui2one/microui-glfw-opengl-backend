@@ -16,12 +16,13 @@ import (
 )
 
 type GlyphMetrics struct {
-	IDX sfnt.GlyphIndex
+	IDX       sfnt.GlyphIndex
+	UnicodeID uint16
+	AdvanceX  int
+	BearingX  int
+	BearingY  int
 
-	AdvanceX int
-	BearingX int
-	BearingY int
-
+	X, Y   int
 	Width  int
 	Height int
 }
@@ -47,23 +48,30 @@ type AtlasData struct {
 	Glyphs      []*GlyphMetrics
 }
 
-func (a *AtlasData) Print() {
+func (a *AtlasData) Print(showGlyphs bool) {
 	fmt.Println("AtlasData ---->")
 	fmt.Println("  FontName :", a.FontName)
 	fmt.Println("  Width :", a.Width)
 	fmt.Println("  Height :", a.Height)
 
 	a.FontMetrics.Print()
-	// fmt.Println("  Glyphs ---->")
-	// for _, g := range a.Glyphs {
-	// 	fmt.Println("    GlyphMetrics ---->")
-	// 	fmt.Println("      IDX :", g.IDX)
-	// 	fmt.Println("      AdvanceX :", g.AdvanceX)
-	// 	fmt.Println("      BearingX :", g.BearingX)
-	// 	fmt.Println("      BearingY :", g.BearingY)
-	// 	fmt.Println("      Width :", g.Width)
-	// 	fmt.Println("      Height :", g.Height)
-	// }
+	fmt.Println(len(a.Glyphs), "  Glyphs ---->")
+	if showGlyphs {
+
+		for _, g := range a.Glyphs {
+			fmt.Println("    GlyphMetrics --")
+			fmt.Println("      IDX :", g.IDX)
+
+			fmt.Printf("      UnicodeID : 0x%04x --> %c\n", g.UnicodeID, g.UnicodeID)
+			fmt.Println("      Coords :", g.X, g.Y)
+
+			fmt.Println("      AdvanceX :", g.AdvanceX)
+			fmt.Println("      BearingX :", g.BearingX)
+			fmt.Println("      BearingY :", g.BearingY)
+			fmt.Println("      Width :", g.Width)
+			fmt.Println("      Height :", g.Height)
+		}
+	}
 }
 
 func getFontMetrics(font *sfnt.Font, fontSize int) *FontMetrics {
@@ -119,14 +127,7 @@ func rasterizeGlyph(font *sfnt.Font, idx sfnt.GlyphIndex, fontSize int) (*image.
 	segs, _ := font.LoadGlyph(buf, idx, fixed.Int26_6(fontSize<<6), nil)
 
 	minX := segs.Bounds().Min.X.Floor()
-	maxX := segs.Bounds().Max.X.Ceil()
-
 	minY := segs.Bounds().Min.Y.Floor()
-	maxY := segs.Bounds().Max.Y.Ceil()
-
-	glyphHeight := maxY - minY
-	glyphWidth := maxX - minX
-	fmt.Println("Glyph Dimensions : ", glyphWidth, glyphHeight)
 
 	r := vector.NewRasterizer(fontSize, fontSize)
 
@@ -135,6 +136,7 @@ func rasterizeGlyph(font *sfnt.Font, idx sfnt.GlyphIndex, fontSize int) (*image.
 	offsetX := float32(-minX + 2)
 	offsetY := float32(-minY + 2) // baseline
 
+	// "apply" segmentOps
 	for _, seg := range segs {
 		switch seg.Op {
 		case sfnt.SegmentOpMoveTo:
@@ -188,7 +190,7 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int) *AtlasData {
 	fontSize := int(64)
 
 	images := []*image.RGBA{}
-	metricss := []*GlyphMetrics{}
+	glyphs_metrics := []*GlyphMetrics{}
 	if glyphsRange[0] > glyphsRange[1] {
 		log.Println("bad glyphs range given...")
 		return nil
@@ -204,7 +206,8 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int) *AtlasData {
 			continue
 		}
 		images = append(images, img3)
-		metricss = append(metricss, metrics)
+		metrics.UnicodeID = uint16(i)
+		glyphs_metrics = append(glyphs_metrics, metrics)
 	}
 
 	finalDIM := int(math.Ceil(math.Sqrt(float64(len(images))))) * fontSize
@@ -213,7 +216,7 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int) *AtlasData {
 	step := int(fontSize)
 	startX := 0
 	startY := 0
-	for _, img := range images {
+	for i, img := range images {
 		dstRect := image.Rect(
 			int(startX),
 			int(startY),
@@ -221,6 +224,10 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int) *AtlasData {
 			int(startY)+img.Bounds().Dy(),
 		)
 		draw.Draw(finalIMG, dstRect, img, image.Point{}, draw.Src)
+		glyphs_metrics[i].X = startX
+		glyphs_metrics[i].Y = startY
+
+		// prepare newt step
 		startX += step
 		if startX >= int(finalDIM) {
 			startX = 0
@@ -242,6 +249,7 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int) *AtlasData {
 		Height:      finalDIM,
 		Atlas:       finalIMG,
 		FontMetrics: fontMetrics,
+		Glyphs:      glyphs_metrics,
 	}
 
 	return atlasData
