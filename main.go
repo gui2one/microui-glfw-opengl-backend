@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	gui2onegl "font-stuff/pkg/gui2one-gl"
+	"path"
 
 	"runtime"
 
@@ -27,6 +28,12 @@ func handleDrop(wnd *glfw.Window, paths []string) {
 	fmt.Println("Dropped", len(paths), "files")
 	fmt.Println(paths)
 	fmt.Println(myApp.AtlasTexture.Width)
+	first := paths[0]
+	if path.Ext(first) == ".ttf" || path.Ext(first) == ".TTF" {
+		atlas := gui2onegl.GenerateAtlas(first, [2]int{0x0020, 0x007E})
+		gl.DeleteTextures(1, &myApp.AtlasTexture.ID)
+		myApp.AtlasTexture = *gui2onegl.FromImage(atlas.Atlas)
+	}
 }
 func handleResize(wnd *glfw.Window, width, height int) {
 	Width = width
@@ -38,9 +45,6 @@ func main() {
 	runtime.LockOSThread()
 	fmt.Println("Starting App...")
 	atlas := gui2onegl.GenerateAtlas("assets/fonts/CONSOLAB.TTF", [2]int{0x0020, 0x007E})
-	// atlas := gui2onegl.GenerateAtlas("assets/fonts/ARIAL.TTF", [2]int{0x0020, 0x0023})
-
-	atlas.Print(false)
 
 	if glfw.Init() != nil {
 		panic("Unable to initialize GLFW")
