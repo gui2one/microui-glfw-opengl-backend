@@ -43,13 +43,12 @@ func handleResize(wnd *glfw.Window, width, height int) {
 func main() {
 
 	runtime.LockOSThread()
-	fmt.Println("Starting App...")
 	atlas := gui2onegl.GenerateAtlas("assets/fonts/CONSOLAB.TTF", [2]int{0x0020, 0x007E})
 
 	if glfw.Init() != nil {
 		panic("Unable to initialize GLFW")
 	}
-	wnd, err := glfw.CreateWindow(Width, Height, "Hello World", nil, nil)
+	wnd, err := glfw.CreateWindow(Width, Height, "gui2one | GL engine | another one ? ... he should stop ", nil, nil)
 	wnd.SetDropCallback(handleDrop)
 	wnd.SetFramebufferSizeCallback(handleResize)
 	if err != nil {

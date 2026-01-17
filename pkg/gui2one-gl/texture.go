@@ -47,7 +47,6 @@ func (t Texture) BindWithActiveUnit(num uint32) {
 // GenerateSolidTexture generates a texture with a solid color
 func GenerateSolidTexture(width, height int) *Texture {
 
-	// generate pixels
 	pixels := make([]byte, width*height*4)
 	for i := 0; i < len(pixels); i += 4 {
 		pixels[i+0] = 0

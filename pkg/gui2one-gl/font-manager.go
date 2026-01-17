@@ -240,7 +240,6 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int) *AtlasData {
 	// png.Encode(f, finalIMG)
 
 	fontMetrics := getFontMetrics(font, fontSize)
-	// fontMetrics.Print()
 
 	atlasData := &AtlasData{
 		FontName:    path.Base(fontFilePath),
