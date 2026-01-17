@@ -32,10 +32,10 @@ func (a *App) Init() {
 
 var Square = GlMeshData{
 	Vertices: []float32{
-		/*pos */ 0.0, 0.0 /*uvs */, 0.0, 0.0,
-		/*pos */ 1.0, 0.0 /*uvs */, 1.0, 0.0,
-		/*pos */ 1.0, 1.0 /*uvs */, 1.0, 1.0,
-		/*pos */ 0.0, 1.0 /*uvs */, 0.0, 1.0,
+		/*pos */ 0.0, 0.0 /*uvs */, 0.0, 0.0 /* color */, 1.0, 0.0, 1.0,
+		/*pos */ 1.0, 0.0 /*uvs */, 1.0, 0.0 /* color */, 1.0, 0.0, 1.0,
+		/*pos */ 1.0, 1.0 /*uvs */, 1.0, 1.0 /* color */, 1.0, 0.0, 1.0,
+		/*pos */ 0.0, 1.0 /*uvs */, 0.0, 1.0 /* color */, 1.0, 0.0, 1.0,
 	},
 	Indices: []uint32{
 		0, 1, 2,
@@ -57,24 +57,29 @@ func NewGlMeshData() *GlMeshData {
 
 // Init GlMeshData gl resources
 func (m *GlMeshData) Init() {
+	sizeOfFloat32 := 4
+	numFloatsPerVertex := 2 + 2 + 3
+	stride := int32(sizeOfFloat32 * numFloatsPerVertex)
+
 	gl.GenVertexArrays(1, &m.VAO)
 	gl.GenBuffers(1, &m.VBO)
 	gl.GenBuffers(1, &m.IndexBuffer)
 	gl.BindVertexArray(m.VAO)
 	gl.BindBuffer(gl.ARRAY_BUFFER, m.VBO)
-	gl.BufferData(gl.ARRAY_BUFFER, 4*len(m.Vertices), gl.Ptr(m.Vertices), gl.STATIC_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER, numFloatsPerVertex*len(m.Vertices), gl.Ptr(m.Vertices), gl.STATIC_DRAW)
 
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, m.IndexBuffer)
-	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, 4*len(m.Indices), gl.Ptr(m.Indices), gl.STATIC_DRAW)
+	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, numFloatsPerVertex*len(m.Indices), gl.Ptr(m.Indices), gl.STATIC_DRAW)
 
-	sizeOfFloat32 := 4
-	numFloatsPerVertex := 2 + 2
-	stride := int32(sizeOfFloat32 * numFloatsPerVertex)
-
+	/* position 2d */
 	gl.EnableVertexAttribArray(0)
 	gl.VertexAttribPointerWithOffset(0, 2, gl.FLOAT, false, stride, 0)
+	/* uvs */
 	gl.EnableVertexAttribArray(1)
-	gl.VertexAttribPointerWithOffset(1, 2, gl.FLOAT, false, stride, 2*4) // 2 x 4byte (float32)
+	gl.VertexAttribPointerWithOffset(1, 2, gl.FLOAT, false, stride, uintptr(2*sizeOfFloat32))
+	/* color RGB */
+	gl.EnableVertexAttribArray(2)
+	gl.VertexAttribPointerWithOffset(2, 3, gl.FLOAT, false, stride, uintptr((2+2)*sizeOfFloat32))
 
 }
 
