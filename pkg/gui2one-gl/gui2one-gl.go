@@ -81,6 +81,7 @@ func (m *GlMeshData) Init() {
 	gl.EnableVertexAttribArray(2)
 	gl.VertexAttribPointerWithOffset(2, 3, gl.FLOAT, false, stride, uintptr((2+2)*sizeOfFloat32))
 
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
 }
 
 type glTexture struct {
@@ -99,7 +100,7 @@ func DrawMyStuff(app *App, w, h int) {
 	gl.BindTexture(gl.TEXTURE_2D, app.AtlasTexture.ID)
 
 	gl.BindVertexArray(app.Square.VAO)
-	// gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, app.Square.IndexBuffer)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, app.Square.IndexBuffer)
 	gl.UseProgram(app.MainShader)
 
 	loc := gl.GetUniformLocation(app.MainShader, gl.Str("uTexture\x00"))
