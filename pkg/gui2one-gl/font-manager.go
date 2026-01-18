@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"image/draw"
+	"image/png"
 	"log"
 	"math"
 	"os"
@@ -208,13 +209,20 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int) *AtlasData {
 		metrics.UnicodeID = uint16(i)
 		glyphs_metrics = append(glyphs_metrics, metrics)
 	}
-
-	finalDIM := int(math.Ceil(math.Sqrt(float64(len(images))))) * fontSize
+	bufferNum := 30 /* number of empty spaces for White, icons and stuff */
+	numCols := int(math.Ceil(math.Sqrt(float64(len(images) + bufferNum))))
+	finalDIM := numCols * fontSize
 	finalIMG := image.NewRGBA(image.Rect(0, 0, int(finalDIM), int(finalDIM)))
 
 	step := int(fontSize)
-	startX := 0
-	startY := 0
+	startX := bufferNum % numCols * step
+	startY := bufferNum / numCols * step
+
+	// draw blacl cell into Atlas
+	draw.Draw(finalIMG, image.Rect(0, 0, fontSize, fontSize), image.Black, image.Point{}, draw.Src)
+	// draw white cell into Atlas
+	draw.Draw(finalIMG, image.Rect(fontSize*1, 0, fontSize*2, fontSize), image.White, image.Point{}, draw.Src)
+
 	for i, img := range images {
 		dstRect := image.Rect(
 			int(startX),
@@ -234,10 +242,10 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int) *AtlasData {
 		}
 	}
 
-	// // write file on disk ... for now
-	// f, _ := os.Create("out.png")
-	// defer f.Close()
-	// png.Encode(f, finalIMG)
+	// write file on disk ... for now
+	f, _ := os.Create("out.png")
+	defer f.Close()
+	png.Encode(f, finalIMG)
 
 	fontMetrics := getFontMetrics(font, fontSize)
 
