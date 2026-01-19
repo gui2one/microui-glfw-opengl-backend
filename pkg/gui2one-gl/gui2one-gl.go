@@ -111,15 +111,13 @@ func (a *App) PushText(x, y float32, text string, color [3]float32) {
 				P1: Point{X: uvStartX, Y: 1.0 - uvStartY - uvH},
 				P2: Point{X: uvStartX + uvW, Y: 1.0 - uvStartY},
 			}
-			fmt.Println(uvsRect)
-			// drawY := penY + float32(a.AtlasData.FontMetrics.Ascent+glyph.BearingY)
-			// drawY := penY - float32(glyph.BearingY)
+			// fmt.Println(uvsRect)
+
 			drawY := penY + float32(a.AtlasData.FontMetrics.Ascent-glyph.BearingY)
 
 			a.PushRect(penX+float32(glyph.BearingX), drawY, float32(glyph.Width), float32(glyph.Height), uvsRect, color)
 			penX += float32(glyph.AdvanceX)
 
-			glyph.Print()
 		}
 	}
 }
@@ -169,7 +167,7 @@ func DrawMyStuff(app *App, w, h int) {
 	app.FlushRects()
 	// proj := mgl.Ortho2D(0, float32(w)/float32(h), 0, 1.0)
 	proj := mgl.Ortho2D(0, float32(w), 0, float32(h))
-	gl.ClearColor(0.0, 0.0, 0.0, 1.0)
+	gl.ClearColor(1.0, 0.0, 0.0, 1.0)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 	gl.BindTexture(gl.TEXTURE_2D, app.AtlasTexture.ID)

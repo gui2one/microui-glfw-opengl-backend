@@ -22,7 +22,7 @@ func initMyStuff() {
 
 	myApp.Init()
 
-	myApp.PushRect(0, 0, 512, 256,
+	myApp.PushRect(10, 10, 512-20, 256-10,
 		myApp.AtlasData.White,
 		[3]float32{0.5, 0.2, 0.0},
 	)
