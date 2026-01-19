@@ -97,16 +97,16 @@ func (a *App) PushText(x, y float32, text string, color [3]float32) {
 		if c >= 0x0020 && c <= 0x007E {
 			glyph := a.AtlasData.Glyphs[c-0x0020]
 			fmt.Printf("%c\n", glyph.UnicodeID)
-			startX := float32(glyph.X) / float32(a.AtlasData.Width)
-			startY := float32(glyph.Y) / float32(a.AtlasData.Height)
-			w := float32(glyph.Width) / float32(a.AtlasData.Width)
-			h := float32(glyph.Height) / float32(a.AtlasData.Height)
+			uvStartX := float32(glyph.X) / float32(a.AtlasData.Width)
+			uvStartY := float32(glyph.Y) / float32(a.AtlasData.Height)
+			uvW := float32(glyph.Width) / float32(a.AtlasData.Width)
+			uvH := float32(glyph.Height) / float32(a.AtlasData.Height)
 			uvsRect := Rect{
-				P1: Point{X: float32(startX), Y: 1.0 - float32(startY)},
-				P2: Point{X: float32(startX) + float32(w), Y: 1.0 - (float32(startY) + float32(h))},
+				P1: Point{X: uvStartX, Y: 1.0 - uvStartY - uvH},
+				P2: Point{X: uvStartX + uvW, Y: 1.0 - uvStartY},
 			}
 			fmt.Println(uvsRect)
-			a.PushRect(x, y, float32(glyph.Width)/float32(a.AtlasData.Width), float32(glyph.Height)/float32(a.AtlasData.Height), uvsRect, color)
+			a.PushRect(x, y, float32(glyph.Width), float32(glyph.Height), uvsRect, color)
 		}
 	}
 }
@@ -154,7 +154,8 @@ type Rect struct {
 // DrawMyStuff draws my stuff
 func DrawMyStuff(app *App, w, h int) {
 	app.FlushRects()
-	proj := mgl.Ortho2D(0, float32(w)/float32(h), 0, 1.0)
+	// proj := mgl.Ortho2D(0, float32(w)/float32(h), 0, 1.0)
+	proj := mgl.Ortho2D(0, float32(w), 0, float32(h))
 	gl.ClearColor(0.0, 0.0, 0.0, 1.0)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 

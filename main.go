@@ -22,12 +22,12 @@ func initMyStuff() {
 
 	myApp.Init()
 
-	// myApp.PushRect(0.1, 0.1, 0.8, 0.8,
-	// 	myApp.AtlasData.White,
-	// 	[3]float32{1.0, 1.0, 0.0},
-	// )
+	myApp.PushRect(10, 10, 100, 100,
+		myApp.AtlasData.White,
+		[3]float32{0.5, 0.2, 0.0},
+	)
 
-	myApp.PushText(0.1, 0.1, "A", [3]float32{1.0, 1.0, 1.0})
+	myApp.PushText(50, 50, "A", [3]float32{1.0, 1.0, 1.0})
 
 }
 func handleDrop(wnd *glfw.Window, paths []string) {
