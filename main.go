@@ -50,9 +50,9 @@ func handleCursorPos(wnd *glfw.Window, x, y float64) {
 	action := wnd.GetMouseButton(glfw.MouseButton1)
 	if action == glfw.Press {
 		myApp.PushRect(
-			float32(x)/float32(Width)*(float32(Width)/float32(Height)),
-			(float32(Height)-float32(y))/float32(Height),
-			0.4, 0.4,
+			float32(x),
+			float32(float64(Height)-y),
+			100, 100,
 			gui2onegl.Rect{
 				P1: gui2onegl.Point{X: 0.0, Y: 0.0},
 				P2: gui2onegl.Point{X: 1.0, Y: 1.0},

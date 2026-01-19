@@ -62,7 +62,7 @@ func (a *App) Init() {
 	atlasData := GenerateAtlas("assets/fonts/CONSOLAB.TTF", [2]int{0x0020, 0x007E})
 	a.AtlasData = *atlasData
 	a.AtlasTexture = *FromImage(atlasData.Atlas)
-	atlasData.Print(true)
+	// atlasData.Print(true)
 
 	a.AtlasTexture.Bind()
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)

@@ -174,7 +174,7 @@ func rasterizeGlyph(font *sfnt.Font, idx sfnt.GlyphIndex, fontSize int) (*image.
 	}
 
 	img := image.NewRGBA(image.Rect(0, 0, fontSize, fontSize))
-	draw.Draw(img, img.Bounds(), image.Black, image.Point{}, draw.Src)
+	// draw.Draw(img, img.Bounds(), image.Black, image.Point{}, draw.Src)
 	r.Draw(img, img.Bounds(), image.White, image.Point{})
 
 	glypMetrics := getGlyphMetrics(font, idx, segs, fontSize)
