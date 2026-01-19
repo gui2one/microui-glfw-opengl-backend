@@ -62,6 +62,7 @@ func (a *App) Init() {
 	atlasData := GenerateAtlas("assets/fonts/CONSOLAB.TTF", [2]int{0x0020, 0x007E})
 	a.AtlasData = *atlasData
 	a.AtlasTexture = *FromImage(atlasData.Atlas)
+	atlasData.Print(true)
 
 	a.AtlasTexture.Bind()
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
@@ -91,7 +92,24 @@ func (a *App) PushRect(x, y, w, h float32, uvs Rect, color [3]float32) {
 	}
 	m.Indices = append(m.Indices, indices...)
 }
-
+func (a *App) PushText(x, y float32, text string, color [3]float32) {
+	for _, c := range text {
+		if c >= 0x0020 && c <= 0x007E {
+			glyph := a.AtlasData.Glyphs[c-0x0020]
+			fmt.Printf("%c\n", glyph.UnicodeID)
+			startX := float32(glyph.X) / float32(a.AtlasData.Width)
+			startY := float32(glyph.Y) / float32(a.AtlasData.Height)
+			w := float32(glyph.Width) / float32(a.AtlasData.Width)
+			h := float32(glyph.Height) / float32(a.AtlasData.Height)
+			uvsRect := Rect{
+				P1: Point{X: float32(startX), Y: 1.0 - float32(startY)},
+				P2: Point{X: float32(startX) + float32(w), Y: 1.0 - (float32(startY) + float32(h))},
+			}
+			fmt.Println(uvsRect)
+			a.PushRect(x, y, float32(glyph.Width)/float32(a.AtlasData.Width), float32(glyph.Height)/float32(a.AtlasData.Height), uvsRect, color)
+		}
+	}
+}
 func (a *App) FlushRects() {
 	m := a.MeshBuffer
 
