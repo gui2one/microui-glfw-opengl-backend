@@ -55,6 +55,9 @@ func (a *App) Init() {
 	gl.EnableVertexAttribArray(2)
 	gl.VertexAttribPointerWithOffset(2, 3, gl.FLOAT, false, stride, uintptr((2+2)*a.SizeOfFloat32))
 
+	gl.Disable(gl.DEPTH_TEST)
+	gl.Enable(gl.BLEND)
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 }
 
 func (a *App) PushRect(x, y, w, h float32, uvs Rect, color [3]float32) {

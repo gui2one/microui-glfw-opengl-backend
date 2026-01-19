@@ -48,7 +48,19 @@ func handleResize(wnd *glfw.Window, width, height int) {
 	gl.Viewport(0, 0, int32(Width), int32(Height))
 }
 func handleCursorPos(wnd *glfw.Window, x, y float64) {
-	// fmt.Println(x, y)
+	action := wnd.GetMouseButton(glfw.MouseButton1)
+	if action == glfw.Press {
+		myApp.PushRect(
+			float32(x)/float32(Width)*(float32(Width)/float32(Height)),
+			(float32(Height)-float32(y))/float32(Height),
+			0.1, 0.1,
+			gui2onegl.Rect{
+				P1: gui2onegl.Point{X: 0.0, Y: 0.0},
+				P2: gui2onegl.Point{X: 1.0, Y: 1.0},
+			},
+			[3]float32{rand.Float32(), rand.Float32(), rand.Float32()},
+		)
+	}
 }
 func handleMouseButton(wnd *glfw.Window, button glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
 	if action == glfw.Press {
@@ -89,6 +101,7 @@ func main() {
 	myApp.AtlasTexture = *gui2onegl.FromImage(atlas.Atlas)
 	initMyStuff()
 	gl.Viewport(0, 0, int32(Width), int32(Height))
+	glfw.SwapInterval(0)
 	for !wnd.ShouldClose() {
 		glfw.WaitEvents()
 		gui2onegl.DrawMyStuff(&myApp, Width, Height)
