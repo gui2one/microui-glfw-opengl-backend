@@ -19,10 +19,8 @@ var Height = 480
 func initMyStuff() {
 
 	fmt.Println("Init App OpenGL Resources")
-	myApp.Init()
-	myApp.MeshBuffer = gui2onegl.NewGlMeshData()
 
-	myApp.MeshBuffer.Init()
+	myApp.Init()
 
 	myApp.PushRect(0.1, 0.1, 0.3, 0.3,
 		gui2onegl.Rect{
@@ -92,10 +90,10 @@ func main() {
 	initMyStuff()
 	gl.Viewport(0, 0, int32(Width), int32(Height))
 	for !wnd.ShouldClose() {
-
+		glfw.WaitEvents()
 		gui2onegl.DrawMyStuff(&myApp, Width, Height)
 		wnd.SwapBuffers()
-		glfw.WaitEvents()
+
 	}
 
 	glfw.Terminate()

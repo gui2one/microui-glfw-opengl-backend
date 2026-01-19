@@ -24,11 +24,37 @@ type App struct {
 	MainShader         uint32
 	AtlasTexture       Texture
 	NumFloatsPerVertex int
+	SizeOfFloat32      int
 }
 
 func (a *App) Init() {
 	a.NumFloatsPerVertex = 2 + 2 + 3
+	a.SizeOfFloat32 = 4
+
 	a.MainShader = generateShader("assets/shaders/main_vertex.glsl", "assets/shaders/main_fragment.glsl")
+
+	a.MeshBuffer = NewGlMeshData()
+	m := a.MeshBuffer
+	gl.GenVertexArrays(1, &m.VAO)
+	gl.GenBuffers(1, &m.VBO)
+	gl.GenBuffers(1, &m.IndexBuffer)
+
+	stride := int32(a.SizeOfFloat32 * a.NumFloatsPerVertex)
+	gl.BindVertexArray(m.VAO)
+	gl.BindBuffer(gl.ARRAY_BUFFER, m.VBO)
+
+	// gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, m.IndexBuffer)
+
+	/* position 2d */
+	gl.EnableVertexAttribArray(0)
+	gl.VertexAttribPointerWithOffset(0, 2, gl.FLOAT, false, stride, 0)
+	/* uvs */
+	gl.EnableVertexAttribArray(1)
+	gl.VertexAttribPointerWithOffset(1, 2, gl.FLOAT, false, stride, uintptr(2*a.SizeOfFloat32))
+	/* color RGB */
+	gl.EnableVertexAttribArray(2)
+	gl.VertexAttribPointerWithOffset(2, 3, gl.FLOAT, false, stride, uintptr((2+2)*a.SizeOfFloat32))
+
 }
 
 func (a *App) PushRect(x, y, w, h float32, uvs Rect, color [3]float32) {
@@ -57,38 +83,14 @@ func (a *App) PushRect(x, y, w, h float32, uvs Rect, color [3]float32) {
 }
 func (a *App) FlushRects() {
 	m := a.MeshBuffer
-	sizeOfFloat32 := 4
-	stride := int32(sizeOfFloat32 * a.NumFloatsPerVertex)
+
 	gl.BindVertexArray(m.VAO)
 	gl.BindBuffer(gl.ARRAY_BUFFER, m.VBO)
-	gl.BufferData(gl.ARRAY_BUFFER, sizeOfFloat32*len(m.Vertices), gl.Ptr(m.Vertices), gl.STREAM_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER, a.SizeOfFloat32*len(m.Vertices), gl.Ptr(m.Vertices), gl.STREAM_DRAW)
 
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, m.IndexBuffer)
-	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, sizeOfFloat32*len(m.Indices), gl.Ptr(m.Indices), gl.STREAM_DRAW)
+	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, a.SizeOfFloat32*len(m.Indices), gl.Ptr(m.Indices), gl.STREAM_DRAW)
 
-	/* position 2d */
-	gl.EnableVertexAttribArray(0)
-	gl.VertexAttribPointerWithOffset(0, 2, gl.FLOAT, false, stride, 0)
-	/* uvs */
-	gl.EnableVertexAttribArray(1)
-	gl.VertexAttribPointerWithOffset(1, 2, gl.FLOAT, false, stride, uintptr(2*sizeOfFloat32))
-	/* color RGB */
-	gl.EnableVertexAttribArray(2)
-	gl.VertexAttribPointerWithOffset(2, 3, gl.FLOAT, false, stride, uintptr((2+2)*sizeOfFloat32))
-
-}
-
-var Square = GlMeshData{
-	Vertices: []float32{
-		/*pos */ 0.0, 0.0 /*uvs */, 0.0, 0.0 /* color */, 1.0, 1.0, 1.0,
-		/*pos */ 1.0, 0.0 /*uvs */, 1.0, 0.0 /* color */, 1.0, 1.0, 1.0,
-		/*pos */ 1.0, 1.0 /*uvs */, 1.0, 1.0 /* color */, 1.0, 1.0, 1.0,
-		/*pos */ 0.0, 1.0 /*uvs */, 0.0, 1.0 /* color */, 1.0, 1.0, 1.0,
-	},
-	Indices: []uint32{
-		0, 1, 2,
-		2, 3, 0,
-	},
 }
 
 type GlMeshData struct {
@@ -101,42 +103,6 @@ type GlMeshData struct {
 
 func NewGlMeshData() *GlMeshData {
 	return &GlMeshData{}
-}
-
-// Init GlMeshData gl resources
-func (m *GlMeshData) Init() {
-	sizeOfFloat32 := 4
-	numFloatsPerVertex := 2 + 2 + 3
-	stride := int32(sizeOfFloat32 * numFloatsPerVertex)
-
-	gl.GenVertexArrays(1, &m.VAO)
-	gl.GenBuffers(1, &m.VBO)
-	gl.GenBuffers(1, &m.IndexBuffer)
-
-	if len(m.Vertices) == 0 {
-		fmt.Println("No vertices")
-		return
-	}
-	fmt.Println("Has vertices", len(m.Vertices)/numFloatsPerVertex)
-
-	gl.BindVertexArray(m.VAO)
-	gl.BindBuffer(gl.ARRAY_BUFFER, m.VBO)
-	gl.BufferData(gl.ARRAY_BUFFER, numFloatsPerVertex*len(m.Vertices), gl.Ptr(m.Vertices), gl.STATIC_DRAW)
-
-	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, m.IndexBuffer)
-	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, numFloatsPerVertex*len(m.Indices), gl.Ptr(m.Indices), gl.STATIC_DRAW)
-
-	/* position 2d */
-	gl.EnableVertexAttribArray(0)
-	gl.VertexAttribPointerWithOffset(0, 2, gl.FLOAT, false, stride, 0)
-	/* uvs */
-	gl.EnableVertexAttribArray(1)
-	gl.VertexAttribPointerWithOffset(1, 2, gl.FLOAT, false, stride, uintptr(2*sizeOfFloat32))
-	/* color RGB */
-	gl.EnableVertexAttribArray(2)
-	gl.VertexAttribPointerWithOffset(2, 3, gl.FLOAT, false, stride, uintptr((2+2)*sizeOfFloat32))
-
-	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
 }
 
 type glTexture struct {
