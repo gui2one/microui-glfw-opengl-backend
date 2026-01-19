@@ -59,7 +59,7 @@ func (a *App) Init() {
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
 	// Texture ATLAS
-	atlasData := GenerateAtlas("assets/fonts/CONSOLAB.TTF", [2]int{0x0020, 0x007E})
+	atlasData := GenerateAtlas("assets/fonts/ConsolaMono-Bold.TTF", [2]int{0x0020, 0x007E})
 	a.AtlasData = *atlasData
 	a.AtlasTexture = *FromImage(atlasData.Atlas)
 	// atlasData.Print(true)
@@ -93,10 +93,16 @@ func (a *App) PushRect(x, y, w, h float32, uvs Rect, color [3]float32) {
 	m.Indices = append(m.Indices, indices...)
 }
 func (a *App) PushText(x, y float32, text string, color [3]float32) {
+	penX := x
+	penY := y
 	for _, c := range text {
+		if c == '\n' {
+			penX = x
+			penY -= float32(a.AtlasData.FontMetrics.LineHeight)
+		}
 		if c >= 0x0020 && c <= 0x007E {
 			glyph := a.AtlasData.Glyphs[c-0x0020]
-			fmt.Printf("%c\n", glyph.UnicodeID)
+
 			uvStartX := float32(glyph.X) / float32(a.AtlasData.Width)
 			uvStartY := float32(glyph.Y) / float32(a.AtlasData.Height)
 			uvW := float32(glyph.Width) / float32(a.AtlasData.Width)
@@ -106,7 +112,14 @@ func (a *App) PushText(x, y float32, text string, color [3]float32) {
 				P2: Point{X: uvStartX + uvW, Y: 1.0 - uvStartY},
 			}
 			fmt.Println(uvsRect)
-			a.PushRect(x, y, float32(glyph.Width), float32(glyph.Height), uvsRect, color)
+			// drawY := penY + float32(a.AtlasData.FontMetrics.Ascent+glyph.BearingY)
+			// drawY := penY - float32(glyph.BearingY)
+			drawY := penY + float32(a.AtlasData.FontMetrics.Ascent-glyph.BearingY)
+
+			a.PushRect(penX+float32(glyph.BearingX), drawY, float32(glyph.Width), float32(glyph.Height), uvsRect, color)
+			penX += float32(glyph.AdvanceX)
+
+			glyph.Print()
 		}
 	}
 }

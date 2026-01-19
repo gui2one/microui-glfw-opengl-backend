@@ -26,6 +26,23 @@ type GlyphMetrics struct {
 	Width  int
 	Height int
 }
+
+func (g *GlyphMetrics) Print() {
+	fmt.Println("Glyph Metrics ---->")
+	fmt.Println("    GlyphMetrics --")
+	fmt.Println("      IDX :", g.IDX)
+
+	fmt.Printf("      UnicodeID : 0x%04x --> %c\n", g.UnicodeID, g.UnicodeID)
+	fmt.Println("      Coords :", g.X, g.Y)
+
+	fmt.Println("      AdvanceX :", g.AdvanceX)
+	fmt.Println("      BearingX :", g.BearingX)
+	fmt.Println("      BearingY :", g.BearingY)
+	fmt.Println("      Width :", g.Width)
+	fmt.Println("      Height :", g.Height)
+	fmt.Println("-----------------------------")
+}
+
 type FontMetrics struct {
 	Ascent     int
 	Descent    int
@@ -102,7 +119,7 @@ func getGlyphMetrics(font *sfnt.Font, glyphIndex sfnt.GlyphIndex, segs sfnt.Segm
 	bearingY := bounds.Max.Y.Floor()
 
 	minX := segs.Bounds().Min.X.Floor()
-	maxX := segs.Bounds().Max.X.Ceil()
+	maxX := segs.Bounds().Max.X.Ceil() + 1
 
 	minY := segs.Bounds().Min.Y.Floor()
 	maxY := segs.Bounds().Max.Y.Ceil()
@@ -122,65 +139,52 @@ func getGlyphMetrics(font *sfnt.Font, glyphIndex sfnt.GlyphIndex, segs sfnt.Segm
 
 func rasterizeGlyph(font *sfnt.Font, idx sfnt.GlyphIndex, fontSize int) (*image.RGBA, *GlyphMetrics) {
 	buf := new(sfnt.Buffer)
-	if idx == 0 {
-		log.Println("glyph not found")
-		return nil, nil
-	}
+	// Load glyph scaled to fontSize (this returns units in 26.6 fixed point)
 	segs, _ := font.LoadGlyph(buf, idx, fixed.Int26_6(fontSize<<6), nil)
 
-	minX := segs.Bounds().Min.X.Floor()
-	minY := segs.Bounds().Min.Y.Floor()
+	// Calculate bounds in pixels (divide by 64)
+	b := segs.Bounds()
+	minX := float32(b.Min.X) / 64.0
+	minY := float32(b.Min.Y) / 64.0
 
 	r := vector.NewRasterizer(fontSize, fontSize)
 
-	// Simple transform values
-	scale := float32(1.0 / float32(fontSize))
-	offsetX := float32(-minX + 2)
-	offsetY := float32(-minY + 2) // baseline
+	// We want to translate the glyph so it fits in our [fontSize x fontSize] box.
+	// We subtract minX/minY to move the glyph's top-left to (0,0).
+	// Adding a small padding (like 2) is fine, but be careful not to exceed fontSize.
+	offsetX := -minX + 2
+	offsetY := -minY + 2
 
-	// "apply" segmentOps
 	for _, seg := range segs {
+		// Helper to convert 26.6 Fixed to Float pixels
+		f := func(v fixed.Point26_6) (float32, float32) {
+			return offsetX + (float32(v.X) / 64.0), offsetY + (float32(v.Y) / 64.0)
+		}
+
 		switch seg.Op {
 		case sfnt.SegmentOpMoveTo:
-			r.MoveTo(
-				offsetX+scale*float32(seg.Args[0].X),
-				offsetY+scale*float32(seg.Args[0].Y),
-			)
-
+			x, y := f(seg.Args[0])
+			r.MoveTo(x, y)
 		case sfnt.SegmentOpLineTo:
-			r.LineTo(
-				offsetX+scale*float32(seg.Args[0].X),
-				offsetY+scale*float32(seg.Args[0].Y),
-			)
-
+			x, y := f(seg.Args[0])
+			r.LineTo(x, y)
 		case sfnt.SegmentOpQuadTo:
-			r.QuadTo(
-				offsetX+scale*float32(seg.Args[0].X),
-				offsetY+scale*float32(seg.Args[0].Y),
-				offsetX+scale*float32(seg.Args[1].X),
-				offsetY+scale*float32(seg.Args[1].Y),
-			)
-
+			x1, y1 := f(seg.Args[0])
+			x2, y2 := f(seg.Args[1])
+			r.QuadTo(x1, y1, x2, y2)
 		case sfnt.SegmentOpCubeTo:
-			r.CubeTo(
-				offsetX+scale*float32(seg.Args[0].X),
-				offsetY+scale*float32(seg.Args[0].Y),
-				offsetX+scale*float32(seg.Args[1].X),
-				offsetY+scale*float32(seg.Args[1].Y),
-				offsetX+scale*float32(seg.Args[2].X),
-				offsetY+scale*float32(seg.Args[2].Y),
-			)
+			x1, y1 := f(seg.Args[0])
+			x2, y2 := f(seg.Args[1])
+			x3, y3 := f(seg.Args[2])
+			r.CubeTo(x1, y1, x2, y2, x3, y3)
 		}
 	}
 
 	img := image.NewRGBA(image.Rect(0, 0, fontSize, fontSize))
-	// draw.Draw(img, img.Bounds(), image.Black, image.Point{}, draw.Src)
 	r.Draw(img, img.Bounds(), image.White, image.Point{})
 
 	glypMetrics := getGlyphMetrics(font, idx, segs, fontSize)
-
 	return img, glypMetrics
-
 }
 func GenerateAtlas(fontFilePath string, glyphsRange [2]int) *AtlasData {
 
@@ -190,7 +194,7 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int) *AtlasData {
 		return nil
 	}
 	font, _ := sfnt.Parse(fontFile)
-	fontSize := int(64)
+	fontSize := int(32)
 
 	images := []*image.RGBA{}
 	glyphs_metrics := []*GlyphMetrics{}

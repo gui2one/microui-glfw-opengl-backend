@@ -13,8 +13,8 @@ import (
 )
 
 var myApp gui2onegl.App
-var Width = 640
-var Height = 480
+var Width = 512
+var Height = 512
 
 func initMyStuff() {
 
@@ -22,12 +22,12 @@ func initMyStuff() {
 
 	myApp.Init()
 
-	myApp.PushRect(10, 10, 100, 100,
+	myApp.PushRect(0, 0, 512, 256,
 		myApp.AtlasData.White,
 		[3]float32{0.5, 0.2, 0.0},
 	)
 
-	myApp.PushText(50, 50, "A", [3]float32{1.0, 1.0, 1.0})
+	myApp.PushText(10, 256, "0123456789\ndefghijklmnopqrstuvwxyz/\n/;;\n;)", [3]float32{1.0, 1.0, 1.0})
 
 }
 func handleDrop(wnd *glfw.Window, paths []string) {
@@ -52,11 +52,8 @@ func handleCursorPos(wnd *glfw.Window, x, y float64) {
 		myApp.PushRect(
 			float32(x),
 			float32(float64(Height)-y),
-			100, 100,
-			gui2onegl.Rect{
-				P1: gui2onegl.Point{X: 0.0, Y: 0.0},
-				P2: gui2onegl.Point{X: 1.0, Y: 1.0},
-			},
+			rand.Float32()*100, rand.Float32()*100,
+			myApp.AtlasData.White,
 			[3]float32{rand.Float32(), rand.Float32(), rand.Float32()},
 		)
 	}
@@ -66,13 +63,10 @@ func handleMouseButton(wnd *glfw.Window, button glfw.MouseButton, action glfw.Ac
 		x, y := wnd.GetCursorPos()
 
 		myApp.PushRect(
-			float32(x)/float32(Width)*(float32(Width)/float32(Height)),
-			(float32(Height)-float32(y))/float32(Height),
-			0.4, 0.4,
-			gui2onegl.Rect{
-				P1: gui2onegl.Point{X: 0.0, Y: 0.0},
-				P2: gui2onegl.Point{X: 1.0, Y: 1.0},
-			},
+			float32(x),
+			float32(float64(Height)-y),
+			rand.Float32()*100, rand.Float32()*100,
+			myApp.AtlasData.White,
 			[3]float32{rand.Float32(), rand.Float32(), rand.Float32()},
 		)
 	}
