@@ -20,22 +20,25 @@ func InitGL() {
 
 // App base app structure
 type App struct {
-	MeshBuffer   *GlMeshData
-	MainShader   uint32
-	AtlasTexture Texture
+	MeshBuffer         *GlMeshData
+	MainShader         uint32
+	AtlasTexture       Texture
+	NumFloatsPerVertex int
 }
 
 func (a *App) Init() {
-
+	a.NumFloatsPerVertex = 2 + 2 + 3
 	a.MainShader = generateShader("assets/shaders/main_vertex.glsl", "assets/shaders/main_fragment.glsl")
 }
 
 func (a *App) PushRect(x, y, w, h float32, uvs Rect, color [3]float32) {
+	m := a.MeshBuffer
+
+	numVertices := len(m.Vertices) / a.NumFloatsPerVertex
 	rect := Rect{
 		P1: Point{X: x, Y: y},
 		P2: Point{X: x + w, Y: y + h},
 	}
-	m := a.MeshBuffer
 	vertices := []float32{
 		/*pos */ rect.P1.X, rect.P1.Y /*uvs */, uvs.P1.X, uvs.P1.Y /* color */, color[0], color[1], color[2],
 		/*pos */ rect.P2.X, rect.P1.Y /*uvs */, uvs.P2.X, uvs.P1.Y /* color */, color[0], color[1], color[2],
@@ -44,23 +47,24 @@ func (a *App) PushRect(x, y, w, h float32, uvs Rect, color [3]float32) {
 	}
 	m.Vertices = append(m.Vertices, vertices...)
 
-	numIndices := len(m.Indices)
 	indices := []uint32{
-		uint32(numIndices) + 0, uint32(numIndices) + 1, uint32(numIndices) + 2,
-		uint32(numIndices) + 2, uint32(numIndices) + 3, uint32(numIndices) + 0,
+		uint32(numVertices) + 0, uint32(numVertices) + 1, uint32(numVertices) + 2,
+		uint32(numVertices) + 2, uint32(numVertices) + 3, uint32(numVertices) + 0,
 	}
 	m.Indices = append(m.Indices, indices...)
 
+	//fmt.Println("Pushed Rect", len(m.Vertices)/numFloatsPerVertex)
+}
+func (a *App) FlushRects() {
+	m := a.MeshBuffer
 	sizeOfFloat32 := 4
-	numFloatsPerVertex := 2 + 2 + 3
-	stride := int32(sizeOfFloat32 * numFloatsPerVertex)
-
+	stride := int32(sizeOfFloat32 * a.NumFloatsPerVertex)
 	gl.BindVertexArray(m.VAO)
 	gl.BindBuffer(gl.ARRAY_BUFFER, m.VBO)
-	gl.BufferData(gl.ARRAY_BUFFER, numFloatsPerVertex*len(m.Vertices), gl.Ptr(m.Vertices), gl.STATIC_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER, sizeOfFloat32*len(m.Vertices), gl.Ptr(m.Vertices), gl.STREAM_DRAW)
 
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, m.IndexBuffer)
-	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, numFloatsPerVertex*len(m.Indices), gl.Ptr(m.Indices), gl.STATIC_DRAW)
+	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, sizeOfFloat32*len(m.Indices), gl.Ptr(m.Indices), gl.STREAM_DRAW)
 
 	/* position 2d */
 	gl.EnableVertexAttribArray(0)
@@ -71,6 +75,7 @@ func (a *App) PushRect(x, y, w, h float32, uvs Rect, color [3]float32) {
 	/* color RGB */
 	gl.EnableVertexAttribArray(2)
 	gl.VertexAttribPointerWithOffset(2, 3, gl.FLOAT, false, stride, uintptr((2+2)*sizeOfFloat32))
+
 }
 
 var Square = GlMeshData{
@@ -150,7 +155,7 @@ type Rect struct {
 
 // DrawMyStuff draws my stuff
 func DrawMyStuff(app *App, w, h int) {
-
+	app.FlushRects()
 	proj := mgl.Ortho2D(0, float32(w)/float32(h), 0, 1.0)
 	gl.ClearColor(0.1, 0.0, 0.0, 1.0)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)

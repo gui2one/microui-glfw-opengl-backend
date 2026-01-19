@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	gui2onegl "font-stuff/pkg/gui2one-gl"
+	"math/rand"
 	"path"
 
 	"runtime"
@@ -20,7 +21,7 @@ func initMyStuff() {
 	fmt.Println("Init App OpenGL Resources")
 	myApp.Init()
 	myApp.MeshBuffer = gui2onegl.NewGlMeshData()
-	// myApp.MeshBuffer = &gui2onegl.Square
+
 	myApp.MeshBuffer.Init()
 
 	myApp.PushRect(0.1, 0.1, 0.3, 0.3,
@@ -28,7 +29,7 @@ func initMyStuff() {
 			P1: gui2onegl.Point{X: 0.0, Y: 0.0},
 			P2: gui2onegl.Point{X: 1.0, Y: 1.0},
 		},
-		[3]float32{1.0, 1.0, 0.0},
+		[3]float32{1.0, 1.0, 1.0},
 	)
 
 }
@@ -48,6 +49,25 @@ func handleResize(wnd *glfw.Window, width, height int) {
 	Height = height
 	gl.Viewport(0, 0, int32(Width), int32(Height))
 }
+func handleCursorPos(wnd *glfw.Window, x, y float64) {
+	// fmt.Println(x, y)
+}
+func handleMouseButton(wnd *glfw.Window, button glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
+	if action == glfw.Press {
+		x, y := wnd.GetCursorPos()
+
+		myApp.PushRect(
+			float32(x)/float32(Width)*(float32(Width)/float32(Height)),
+			(float32(Height)-float32(y))/float32(Height),
+			0.1, 0.1,
+			gui2onegl.Rect{
+				P1: gui2onegl.Point{X: 0.0, Y: 0.0},
+				P2: gui2onegl.Point{X: 1.0, Y: 1.0},
+			},
+			[3]float32{rand.Float32(), rand.Float32(), rand.Float32()},
+		)
+	}
+}
 func main() {
 
 	runtime.LockOSThread()
@@ -59,6 +79,8 @@ func main() {
 	wnd, err := glfw.CreateWindow(Width, Height, "gui2one | GL engine | another one ? ... he should stop ", nil, nil)
 	wnd.SetDropCallback(handleDrop)
 	wnd.SetFramebufferSizeCallback(handleResize)
+	wnd.SetCursorPosCallback(handleCursorPos)
+	wnd.SetMouseButtonCallback(handleMouseButton)
 	if err != nil {
 		panic("Unable to create GLFW window")
 	}

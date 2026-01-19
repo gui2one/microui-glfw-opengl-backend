@@ -33,6 +33,7 @@ func SetupGLDebug() {
 			log.Printf("[LOW] %s !", message)
 			// panic(message)
 		case gl.DEBUG_SEVERITY_NOTIFICATION:
+			// log.Printf("[NOTIFICATION] %s", message)
 			break
 		}
 	}, nil)
