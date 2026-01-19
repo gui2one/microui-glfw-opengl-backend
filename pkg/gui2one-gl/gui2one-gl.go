@@ -22,6 +22,7 @@ func InitGL() {
 type App struct {
 	MeshBuffer         *GlMeshData
 	MainShader         uint32
+	AtlasData          AtlasData
 	AtlasTexture       Texture
 	NumFloatsPerVertex int
 	SizeOfFloat32      int
@@ -58,8 +59,13 @@ func (a *App) Init() {
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
 	// Texture ATLAS
-	atlasImage := GenerateAtlas("assets/fonts/CONSOLAB.TTF", [2]int{0x0020, 0x007E})
-	a.AtlasTexture = *FromImage(atlasImage.Atlas)
+	atlasData := GenerateAtlas("assets/fonts/CONSOLAB.TTF", [2]int{0x0020, 0x007E})
+	a.AtlasData = *atlasData
+	a.AtlasTexture = *FromImage(atlasData.Atlas)
+
+	a.AtlasTexture.Bind()
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
 
 }
 
@@ -131,7 +137,7 @@ type Rect struct {
 func DrawMyStuff(app *App, w, h int) {
 	app.FlushRects()
 	proj := mgl.Ortho2D(0, float32(w)/float32(h), 0, 1.0)
-	gl.ClearColor(0.1, 0.0, 0.0, 1.0)
+	gl.ClearColor(0.0, 0.0, 0.0, 1.0)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 	gl.BindTexture(gl.TEXTURE_2D, app.AtlasTexture.ID)

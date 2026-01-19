@@ -22,12 +22,9 @@ func initMyStuff() {
 
 	myApp.Init()
 
-	myApp.PushRect(0.1, 0.1, 0.3, 0.3,
-		gui2onegl.Rect{
-			P1: gui2onegl.Point{X: 0.0, Y: 0.0},
-			P2: gui2onegl.Point{X: 1.0, Y: 1.0},
-		},
-		[3]float32{1.0, 1.0, 1.0},
+	myApp.PushRect(0.1, 0.1, 0.8, 0.8,
+		myApp.AtlasData.White,
+		[3]float32{1.0, 1.0, 0.0},
 	)
 
 }
@@ -53,7 +50,7 @@ func handleCursorPos(wnd *glfw.Window, x, y float64) {
 		myApp.PushRect(
 			float32(x)/float32(Width)*(float32(Width)/float32(Height)),
 			(float32(Height)-float32(y))/float32(Height),
-			0.1, 0.1,
+			0.4, 0.4,
 			gui2onegl.Rect{
 				P1: gui2onegl.Point{X: 0.0, Y: 0.0},
 				P2: gui2onegl.Point{X: 1.0, Y: 1.0},
@@ -69,7 +66,7 @@ func handleMouseButton(wnd *glfw.Window, button glfw.MouseButton, action glfw.Ac
 		myApp.PushRect(
 			float32(x)/float32(Width)*(float32(Width)/float32(Height)),
 			(float32(Height)-float32(y))/float32(Height),
-			0.1, 0.1,
+			0.4, 0.4,
 			gui2onegl.Rect{
 				P1: gui2onegl.Point{X: 0.0, Y: 0.0},
 				P2: gui2onegl.Point{X: 1.0, Y: 1.0},
@@ -85,6 +82,9 @@ func main() {
 	if glfw.Init() != nil {
 		panic("Unable to initialize GLFW")
 	}
+	glfw.WindowHint(glfw.ContextVersionMajor, 4)
+	glfw.WindowHint(glfw.ContextVersionMinor, 6)
+	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 	wnd, err := glfw.CreateWindow(Width, Height, "gui2one | GL engine | another one ? ... he should stop ", nil, nil)
 	if err != nil {
 		panic("Unable to create GLFW window")

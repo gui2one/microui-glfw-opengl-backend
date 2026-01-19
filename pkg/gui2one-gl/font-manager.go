@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"image/draw"
+	"image/png"
 	"log"
 	"math"
 	"os"
@@ -45,6 +46,8 @@ type AtlasData struct {
 	Atlas       *image.RGBA
 	FontMetrics *FontMetrics
 	Glyphs      []*GlyphMetrics
+	// colors and icons
+	White Rect
 }
 
 func (a *AtlasData) Print(showGlyphs bool) {
@@ -180,6 +183,7 @@ func rasterizeGlyph(font *sfnt.Font, idx sfnt.GlyphIndex, fontSize int) (*image.
 
 }
 func GenerateAtlas(fontFilePath string, glyphsRange [2]int) *AtlasData {
+
 	fontFile, err := os.ReadFile(fontFilePath)
 	if err != nil {
 		log.Println(err)
@@ -213,17 +217,29 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int) *AtlasData {
 	finalDIM := numCols * fontSize
 	finalIMG := image.NewRGBA(image.Rect(0, 0, int(finalDIM), int(finalDIM)))
 
+	result := &AtlasData{}
 	step := int(fontSize)
 	startX := bufferNum % numCols * step
 	startY := bufferNum / numCols * step
 
-	// fill with black
-	draw.Draw(finalIMG, finalIMG.Bounds(), image.Black, image.Point{}, draw.Src)
-	// draw blacl cell into Atlas
+	// // fill with black
+	// draw.Draw(finalIMG, finalIMG.Bounds(), image.Black, image.Point{}, draw.Src)
+	// draw black cell into Atlas
 	draw.Draw(finalIMG, image.Rect(0, 0, fontSize, fontSize), image.Black, image.Point{}, draw.Src)
 	// draw white cell into Atlas
 	draw.Draw(finalIMG, image.Rect(fontSize*1, 0, fontSize*2, fontSize), image.White, image.Point{}, draw.Src)
 
+	cellStep := float32(fontSize) / float32(finalDIM)
+	result.White = Rect{
+		P1: Point{
+			X: cellStep,
+			Y: (1 - cellStep),
+		},
+		P2: Point{
+			X: cellStep * 2.0,
+			Y: (1),
+		},
+	}
 	for i, img := range images {
 		dstRect := image.Rect(
 			int(startX),
@@ -243,22 +259,20 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int) *AtlasData {
 		}
 	}
 
-	// // write file on disk ... for now
-	// f, _ := os.Create("out.png")
-	// defer f.Close()
-	// png.Encode(f, finalIMG)
+	// write file on disk ... for now
+	f, _ := os.Create("out.png")
+	defer f.Close()
+	png.Encode(f, finalIMG)
 
 	fontMetrics := getFontMetrics(font, fontSize)
 
-	atlasData := &AtlasData{
-		FontName:    path.Base(fontFilePath),
-		Width:       finalDIM,
-		Height:      finalDIM,
-		Atlas:       finalIMG,
-		FontMetrics: fontMetrics,
-		Glyphs:      glyphs_metrics,
-	}
+	result.FontName = path.Base(fontFilePath)
+	result.Width = finalDIM
+	result.Height = finalDIM
+	result.Atlas = finalIMG
+	result.FontMetrics = fontMetrics
+	result.Glyphs = glyphs_metrics
 
-	return atlasData
+	return result
 
 }
