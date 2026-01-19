@@ -19,11 +19,19 @@ func initMyStuff() {
 
 	fmt.Println("Init App OpenGL Resources")
 	myApp.Init()
-	myApp.Square = &gui2onegl.Square
-	myApp.Square.Init()
+	myApp.MeshBuffer = gui2onegl.NewGlMeshData()
+	// myApp.MeshBuffer = &gui2onegl.Square
+	myApp.MeshBuffer.Init()
+
+	myApp.PushRect(0.1, 0.1, 0.3, 0.3,
+		gui2onegl.Rect{
+			P1: gui2onegl.Point{X: 0.0, Y: 0.0},
+			P2: gui2onegl.Point{X: 1.0, Y: 1.0},
+		},
+		[3]float32{1.0, 1.0, 0.0},
+	)
 
 }
-
 func handleDrop(wnd *glfw.Window, paths []string) {
 	fmt.Println("Dropped", len(paths), "files")
 	fmt.Println(paths)

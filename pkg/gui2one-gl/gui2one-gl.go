@@ -20,7 +20,7 @@ func InitGL() {
 
 // App base app structure
 type App struct {
-	Square       *GlMeshData
+	MeshBuffer   *GlMeshData
 	MainShader   uint32
 	AtlasTexture Texture
 }
@@ -28,6 +28,49 @@ type App struct {
 func (a *App) Init() {
 
 	a.MainShader = generateShader("assets/shaders/main_vertex.glsl", "assets/shaders/main_fragment.glsl")
+}
+
+func (a *App) PushRect(x, y, w, h float32, uvs Rect, color [3]float32) {
+	rect := Rect{
+		P1: Point{X: x, Y: y},
+		P2: Point{X: x + w, Y: y + h},
+	}
+	m := a.MeshBuffer
+	vertices := []float32{
+		/*pos */ rect.P1.X, rect.P1.Y /*uvs */, uvs.P1.X, uvs.P1.Y /* color */, color[0], color[1], color[2],
+		/*pos */ rect.P2.X, rect.P1.Y /*uvs */, uvs.P2.X, uvs.P1.Y /* color */, color[0], color[1], color[2],
+		/*pos */ rect.P2.X, rect.P2.Y /*uvs */, uvs.P2.X, uvs.P2.Y /* color */, color[0], color[1], color[2],
+		/*pos */ rect.P1.X, rect.P2.Y /*uvs */, uvs.P1.X, uvs.P2.Y /* color */, color[0], color[1], color[2],
+	}
+	m.Vertices = append(m.Vertices, vertices...)
+
+	numIndices := len(m.Indices)
+	indices := []uint32{
+		uint32(numIndices) + 0, uint32(numIndices) + 1, uint32(numIndices) + 2,
+		uint32(numIndices) + 2, uint32(numIndices) + 3, uint32(numIndices) + 0,
+	}
+	m.Indices = append(m.Indices, indices...)
+
+	sizeOfFloat32 := 4
+	numFloatsPerVertex := 2 + 2 + 3
+	stride := int32(sizeOfFloat32 * numFloatsPerVertex)
+
+	gl.BindVertexArray(m.VAO)
+	gl.BindBuffer(gl.ARRAY_BUFFER, m.VBO)
+	gl.BufferData(gl.ARRAY_BUFFER, numFloatsPerVertex*len(m.Vertices), gl.Ptr(m.Vertices), gl.STATIC_DRAW)
+
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, m.IndexBuffer)
+	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, numFloatsPerVertex*len(m.Indices), gl.Ptr(m.Indices), gl.STATIC_DRAW)
+
+	/* position 2d */
+	gl.EnableVertexAttribArray(0)
+	gl.VertexAttribPointerWithOffset(0, 2, gl.FLOAT, false, stride, 0)
+	/* uvs */
+	gl.EnableVertexAttribArray(1)
+	gl.VertexAttribPointerWithOffset(1, 2, gl.FLOAT, false, stride, uintptr(2*sizeOfFloat32))
+	/* color RGB */
+	gl.EnableVertexAttribArray(2)
+	gl.VertexAttribPointerWithOffset(2, 3, gl.FLOAT, false, stride, uintptr((2+2)*sizeOfFloat32))
 }
 
 var Square = GlMeshData{
@@ -64,6 +107,13 @@ func (m *GlMeshData) Init() {
 	gl.GenVertexArrays(1, &m.VAO)
 	gl.GenBuffers(1, &m.VBO)
 	gl.GenBuffers(1, &m.IndexBuffer)
+
+	if len(m.Vertices) == 0 {
+		fmt.Println("No vertices")
+		return
+	}
+	fmt.Println("Has vertices", len(m.Vertices)/numFloatsPerVertex)
+
 	gl.BindVertexArray(m.VAO)
 	gl.BindBuffer(gl.ARRAY_BUFFER, m.VBO)
 	gl.BufferData(gl.ARRAY_BUFFER, numFloatsPerVertex*len(m.Vertices), gl.Ptr(m.Vertices), gl.STATIC_DRAW)
@@ -90,6 +140,14 @@ type glTexture struct {
 	Height    int32
 }
 
+type Point struct {
+	X, Y float32
+}
+
+type Rect struct {
+	P1, P2 Point
+}
+
 // DrawMyStuff draws my stuff
 func DrawMyStuff(app *App, w, h int) {
 
@@ -99,8 +157,8 @@ func DrawMyStuff(app *App, w, h int) {
 
 	gl.BindTexture(gl.TEXTURE_2D, app.AtlasTexture.ID)
 
-	gl.BindVertexArray(app.Square.VAO)
-	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, app.Square.IndexBuffer)
+	gl.BindVertexArray(app.MeshBuffer.VAO)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, app.MeshBuffer.IndexBuffer)
 	gl.UseProgram(app.MainShader)
 
 	loc := gl.GetUniformLocation(app.MainShader, gl.Str("uTexture\x00"))
@@ -108,9 +166,7 @@ func DrawMyStuff(app *App, w, h int) {
 
 	loc = gl.GetUniformLocation(app.MainShader, gl.Str("uProj\x00"))
 	gl.UniformMatrix4fv(loc, 1, false, &proj[0])
-	gl.DrawElements(gl.TRIANGLES, int32(len(app.Square.Indices)), gl.UNSIGNED_INT, nil)
-
-	// gl.UseProgram(0)
+	gl.DrawElements(gl.TRIANGLES, int32(len(app.MeshBuffer.Indices)), gl.UNSIGNED_INT, nil)
 
 }
 

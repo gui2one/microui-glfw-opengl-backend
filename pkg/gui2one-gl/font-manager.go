@@ -217,6 +217,8 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int) *AtlasData {
 	startX := bufferNum % numCols * step
 	startY := bufferNum / numCols * step
 
+	// fill with black
+	draw.Draw(finalIMG, finalIMG.Bounds(), image.Black, image.Point{}, draw.Src)
 	// draw blacl cell into Atlas
 	draw.Draw(finalIMG, image.Rect(0, 0, fontSize, fontSize), image.Black, image.Point{}, draw.Src)
 	// draw white cell into Atlas
