@@ -43,8 +43,6 @@ func (a *App) Init() {
 	gl.BindVertexArray(m.VAO)
 	gl.BindBuffer(gl.ARRAY_BUFFER, m.VBO)
 
-	// gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, m.IndexBuffer)
-
 	/* position 2d */
 	gl.EnableVertexAttribArray(0)
 	gl.VertexAttribPointerWithOffset(0, 2, gl.FLOAT, false, stride, 0)
@@ -58,6 +56,11 @@ func (a *App) Init() {
 	gl.Disable(gl.DEPTH_TEST)
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+
+	// Texture ATLAS
+	atlasImage := GenerateAtlas("assets/fonts/CONSOLAB.TTF", [2]int{0x0020, 0x007E})
+	a.AtlasTexture = *FromImage(atlasImage.Atlas)
+
 }
 
 func (a *App) PushRect(x, y, w, h float32, uvs Rect, color [3]float32) {
@@ -81,12 +84,14 @@ func (a *App) PushRect(x, y, w, h float32, uvs Rect, color [3]float32) {
 		uint32(numVertices) + 2, uint32(numVertices) + 3, uint32(numVertices) + 0,
 	}
 	m.Indices = append(m.Indices, indices...)
-
-	//fmt.Println("Pushed Rect", len(m.Vertices)/numFloatsPerVertex)
 }
+
 func (a *App) FlushRects() {
 	m := a.MeshBuffer
 
+	if len(m.Vertices) == 0 {
+		return
+	}
 	gl.BindVertexArray(m.VAO)
 	gl.BindBuffer(gl.ARRAY_BUFFER, m.VBO)
 	gl.BufferData(gl.ARRAY_BUFFER, a.SizeOfFloat32*len(m.Vertices), gl.Ptr(m.Vertices), gl.STREAM_DRAW)
@@ -154,6 +159,7 @@ func loadShaderSource(filename string) (string, error) {
 	source = source + "\x00"
 	return source, err
 }
+
 func compileShader(source string, shaderType uint32) (uint32, error) {
 	shader := gl.CreateShader(shaderType)
 
@@ -176,6 +182,7 @@ func compileShader(source string, shaderType uint32) (uint32, error) {
 
 	return shader, nil
 }
+
 func generateShader(vertexSRCPath, fragmentSRCPath string) uint32 {
 	vertexSRC, err := loadShaderSource(vertexSRCPath)
 	if err != nil {

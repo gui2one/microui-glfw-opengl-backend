@@ -81,24 +81,23 @@ func handleMouseButton(wnd *glfw.Window, button glfw.MouseButton, action glfw.Ac
 func main() {
 
 	runtime.LockOSThread()
-	atlas := gui2onegl.GenerateAtlas("assets/fonts/CONSOLAB.TTF", [2]int{0x0020, 0x007E})
 
 	if glfw.Init() != nil {
 		panic("Unable to initialize GLFW")
 	}
 	wnd, err := glfw.CreateWindow(Width, Height, "gui2one | GL engine | another one ? ... he should stop ", nil, nil)
+	if err != nil {
+		panic("Unable to create GLFW window")
+	}
 	wnd.SetDropCallback(handleDrop)
 	wnd.SetFramebufferSizeCallback(handleResize)
 	wnd.SetCursorPosCallback(handleCursorPos)
 	wnd.SetMouseButtonCallback(handleMouseButton)
-	if err != nil {
-		panic("Unable to create GLFW window")
-	}
 
 	wnd.MakeContextCurrent()
 
 	gui2onegl.InitGL()
-	myApp.AtlasTexture = *gui2onegl.FromImage(atlas.Atlas)
+
 	initMyStuff()
 	gl.Viewport(0, 0, int32(Width), int32(Height))
 	glfw.SwapInterval(0)
