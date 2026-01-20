@@ -18,9 +18,15 @@ var Height = 512
 var MuCtx *microui.Context
 
 func Render(ctx *microui.Context) {
+	gui2onegl.PrepareGLobalState(&myApp, Width, Height)
 	myApp.ClearRects()
+	gl.Disable(gl.SCISSOR_TEST) // Start with no scissor
 	for _, cmd := range ctx.CommandList {
 		switch cmd.Type {
+		case microui.MU_COMMAND_CLIP:
+			gui2onegl.DrawMyStuff(&myApp, Width, Height)
+			myApp.SetScissor(cmd.Clip.Rect, Width, Height)
+
 		case microui.MU_COMMAND_RECT:
 
 			rgba := cmd.Rect.Color.ToRGBA()
@@ -31,11 +37,15 @@ func Render(ctx *microui.Context) {
 
 		case microui.MU_COMMAND_TEXT:
 			// fmt.Println(cmd.Rect.Rect.X)
-			myApp.PushText(float32(cmd.Text.Pos.X), float32(cmd.Text.Pos.Y), cmd.Text.Str, [3]float32{1.0, 1.0, 1.0})
-
-		case microui.MU_COMMAND_CLIP:
-			myApp.SetScissor(cmd.Clip.Rect, Width, Height)
+			clr := cmd.Text.Color.ToRGBA()
+			myApp.PushText(
+				float32(cmd.Text.Pos.X),
+				float32(cmd.Text.Pos.Y),
+				cmd.Text.Str,
+				[3]float32{
+					float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
 		}
+
 	}
 
 	gui2onegl.DrawMyStuff(&myApp, Width, Height)
@@ -147,12 +157,15 @@ func main() {
 		glfw.PollEvents()
 
 		MuCtx.Begin()
-		MuCtx.BeginWindow("window 1", microui.NewRect(100, 100, 256, 400))
-		MuCtx.Label("hello there !")
-		MuCtx.EndWindow()
-		MuCtx.BeginWindow("window 2", microui.NewRect(200, 150, 1024, 400))
-		MuCtx.Label("hello there !")
-		MuCtx.EndWindow()
+		if MuCtx.BeginWindow("window 1", microui.NewRect(100, 100, 256, 400)) {
+			MuCtx.Label("hello there !!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+			MuCtx.EndWindow()
+		}
+		if MuCtx.BeginWindow("window 2", microui.NewRect(200, 150, 1024, 400)) {
+
+			MuCtx.Label("hello there !")
+			MuCtx.EndWindow()
+		}
 		MuCtx.End()
 
 		Render(MuCtx)

@@ -113,10 +113,10 @@ func (a *App) PushText(x, y float32, text string, color [3]float32) {
 				P2: Point{X: uvStartX + uvW, Y: 1.0 - uvStartY - uvH},
 			}
 			// fmt.Println(uvsRect)
-
+			fm := a.AtlasData.FontMetrics
 			// ascent := a.AtlasData.FontMetrics.Ascent
 			drawY := penY - float32(glyph.Height-glyph.BearingY)
-			drawY += float32(a.AtlasData.FontMetrics.Ascent)
+			drawY += float32(fm.LineHeight + fm.Descent)
 			a.PushRect(penX+float32(glyph.BearingX), drawY, float32(glyph.Width), float32(glyph.Height), uvsRect, color)
 			penX += float32(glyph.AdvanceX)
 
@@ -180,10 +180,7 @@ type Rect struct {
 	P1, P2 Point
 }
 
-// DrawMyStuff draws my stuff
-func DrawMyStuff(app *App, w, h int) {
-	app.FlushRects()
-	// proj := mgl.Ortho2D(0, float32(w)/float32(h), 0, 1.0)
+func PrepareGLobalState(app *App, w, h int) {
 	proj := mgl.Ortho2D(0, float32(w), float32(h), 0)
 	gl.ClearColor(0.65, 0.65, 0.65, 1.0)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
@@ -199,7 +196,16 @@ func DrawMyStuff(app *App, w, h int) {
 
 	loc = gl.GetUniformLocation(app.MainShader, gl.Str("uProj\x00"))
 	gl.UniformMatrix4fv(loc, 1, false, &proj[0])
+}
+
+// DrawMyStuff draws my stuff
+func DrawMyStuff(app *App, w, h int) {
+	app.FlushRects()
+	// proj := mgl.Ortho2D(0, float32(w)/float32(h), 0, 1.0)
+
 	gl.DrawElements(gl.TRIANGLES, int32(len(app.MeshBuffer.Indices)), gl.UNSIGNED_INT, nil)
+
+	app.ClearRects()
 
 }
 
