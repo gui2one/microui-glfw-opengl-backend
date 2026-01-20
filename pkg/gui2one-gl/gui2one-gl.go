@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-gl/gl/v4.6-core/gl"
 	mgl "github.com/go-gl/mathgl/mgl32"
+	"github.com/zeozeozeo/microui-go"
 )
 
 func InitGL() {
@@ -98,7 +99,7 @@ func (a *App) PushText(x, y float32, text string, color [3]float32) {
 	for _, c := range text {
 		if c == '\n' {
 			penX = x
-			penY -= float32(a.AtlasData.FontMetrics.LineHeight)
+			penY += float32(a.AtlasData.FontMetrics.LineHeight)
 		}
 		if c >= 0x0020 && c <= 0x007E {
 			glyph := a.AtlasData.Glyphs[c-0x0020]
@@ -108,13 +109,14 @@ func (a *App) PushText(x, y float32, text string, color [3]float32) {
 			uvW := float32(glyph.Width) / float32(a.AtlasData.Width)
 			uvH := float32(glyph.Height) / float32(a.AtlasData.Height)
 			uvsRect := Rect{
-				P1: Point{X: uvStartX, Y: 1.0 - uvStartY - uvH},
-				P2: Point{X: uvStartX + uvW, Y: 1.0 - uvStartY},
+				P1: Point{X: uvStartX, Y: 1.0 - uvStartY},
+				P2: Point{X: uvStartX + uvW, Y: 1.0 - uvStartY - uvH},
 			}
 			// fmt.Println(uvsRect)
 
-			drawY := penY + float32(a.AtlasData.FontMetrics.Ascent-glyph.BearingY)
-
+			// ascent := a.AtlasData.FontMetrics.Ascent
+			drawY := penY - float32(glyph.Height-glyph.BearingY)
+			drawY += float32(a.AtlasData.FontMetrics.Ascent)
 			a.PushRect(penX+float32(glyph.BearingX), drawY, float32(glyph.Width), float32(glyph.Height), uvsRect, color)
 			penX += float32(glyph.AdvanceX)
 
@@ -157,6 +159,16 @@ func (a *App) ClearRects() {
 	gl.EnableVertexAttribArray(2)
 	gl.VertexAttribPointerWithOffset(2, 3, gl.FLOAT, false, stride, uintptr((2+2)*a.SizeOfFloat32))
 }
+func (app *App) SetScissor(r microui.Rect, width int, height int) {
+	// Convert top-left Y to bottom-left Y
+	gl.Scissor(
+		int32(r.X),
+		int32(height-(r.Y+r.H)),
+		int32(r.W),
+		int32(r.H),
+	)
+	gl.Enable(gl.SCISSOR_TEST)
+}
 
 type GlMeshData struct {
 	Vertices    []float32
@@ -188,7 +200,7 @@ type Rect struct {
 func DrawMyStuff(app *App, w, h int) {
 	app.FlushRects()
 	// proj := mgl.Ortho2D(0, float32(w)/float32(h), 0, 1.0)
-	proj := mgl.Ortho2D(0, float32(w), 0, float32(h))
+	proj := mgl.Ortho2D(0, float32(w), float32(h), 0)
 	gl.ClearColor(1.0, 0.0, 0.0, 1.0)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 

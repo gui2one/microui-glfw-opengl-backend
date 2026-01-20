@@ -23,10 +23,11 @@ func Render(ctx *microui.Context) {
 	for _, cmd := range ctx.CommandList {
 		switch cmd.Type {
 		case microui.MU_COMMAND_RECT:
-			// fmt.Println(cmd.Rect.Rect.X)
+
+			rgba := cmd.Rect.Color.ToRGBA()
 			myApp.PushRect(float32(cmd.Rect.Rect.X), float32(cmd.Rect.Rect.Y), float32(cmd.Rect.Rect.W), float32(cmd.Rect.Rect.H),
 				myApp.AtlasData.White,
-				[3]float32{0.5, 0.5, 1.0},
+				[3]float32{float32(rgba.R) / 255.0, float32(rgba.G) / 255.0, float32(rgba.B) / 255.0},
 			)
 
 		case microui.MU_COMMAND_TEXT:
@@ -34,10 +35,8 @@ func Render(ctx *microui.Context) {
 			myApp.PushText(float32(cmd.Text.Pos.X), float32(cmd.Text.Pos.Y), cmd.Text.Str, [3]float32{1.0, 1.0, 1.0})
 
 		case microui.MU_COMMAND_CLIP:
-			// fmt.Println("clip", cmd.Clip.Rect.X)
-
+			myApp.SetScissor(cmd.Clip.Rect, Width, Height)
 		}
-		// cmd = ctx.NextCommand(cmd)
 	}
 
 	gui2onegl.DrawMyStuff(&myApp, Width, Height)
@@ -46,7 +45,7 @@ func TextWidth(font microui.Font, text string) int {
 	return 150
 }
 func TextHeight(font microui.Font) int {
-	return 40
+	return 64
 }
 func initMyStuff() {
 
@@ -136,8 +135,8 @@ func main() {
 		glfw.WaitEvents()
 
 		MuCtx.Begin()
-		MuCtx.BeginWindow("window 1", microui.NewRect(100, 100, 256, 30))
-		// MuCtx.Label("hello there !")
+		MuCtx.BeginWindow("window 1", microui.NewRect(100, 100, 256, 400))
+		MuCtx.Label("hello there !")
 		MuCtx.EndWindow()
 		MuCtx.End()
 
