@@ -10,24 +10,56 @@ import (
 
 	"github.com/go-gl/gl/v4.6-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/zeozeozeo/microui-go"
 )
 
 var myApp gui2onegl.App
 var Width = 512
 var Height = 512
+var MuCtx *microui.Context
 
+func Render(ctx *microui.Context) {
+	myApp.ClearRects()
+	for _, cmd := range ctx.CommandList {
+		switch cmd.Type {
+		case microui.MU_COMMAND_RECT:
+			// fmt.Println(cmd.Rect.Rect.X)
+			myApp.PushRect(float32(cmd.Rect.Rect.X), float32(cmd.Rect.Rect.Y), float32(cmd.Rect.Rect.W), float32(cmd.Rect.Rect.H),
+				myApp.AtlasData.White,
+				[3]float32{0.5, 0.5, 1.0},
+			)
+
+		case microui.MU_COMMAND_TEXT:
+			// fmt.Println(cmd.Rect.Rect.X)
+			myApp.PushText(float32(cmd.Text.Pos.X), float32(cmd.Text.Pos.Y), cmd.Text.Str, [3]float32{1.0, 1.0, 1.0})
+
+		case microui.MU_COMMAND_CLIP:
+			// fmt.Println("clip", cmd.Clip.Rect.X)
+
+		}
+		// cmd = ctx.NextCommand(cmd)
+	}
+
+	gui2onegl.DrawMyStuff(&myApp, Width, Height)
+}
+func TextWidth(font microui.Font, text string) int {
+	return 150
+}
+func TextHeight(font microui.Font) int {
+	return 40
+}
 func initMyStuff() {
 
 	fmt.Println("Init App OpenGL Resources")
 
 	myApp.Init()
 
-	myApp.PushRect(10, 10, 512-20, 256-10,
-		myApp.AtlasData.White,
-		[3]float32{0.5, 0.2, 0.0},
-	)
+	// myApp.PushRect(10, 10, 512-20, 256-10,
+	// 	myApp.AtlasData.White,
+	// 	[3]float32{0.5, 0.2, 0.0},
+	// )
 
-	myApp.PushText(10, 256, "0123456789\ndefghijklmnopqrstuvwxyz/\n/;;\n;)", [3]float32{1.0, 1.0, 1.0})
+	myApp.PushText(100, 256, "0123456789\ndefghijklmnopqrstuvwxyz/\n/;;\n;)", [3]float32{1.0, 1.0, 1.0})
 
 }
 func handleDrop(wnd *glfw.Window, paths []string) {
@@ -93,13 +125,24 @@ func main() {
 	wnd.MakeContextCurrent()
 
 	gui2onegl.InitGL()
-
+	MuCtx = microui.NewContext()
+	MuCtx.TextHeight = TextHeight
+	MuCtx.TextWidth = TextWidth
 	initMyStuff()
 	gl.Viewport(0, 0, int32(Width), int32(Height))
 	glfw.SwapInterval(0)
 	for !wnd.ShouldClose() {
+
 		glfw.WaitEvents()
-		gui2onegl.DrawMyStuff(&myApp, Width, Height)
+
+		MuCtx.Begin()
+		MuCtx.BeginWindow("window 1", microui.NewRect(100, 100, 256, 30))
+		// MuCtx.Label("hello there !")
+		MuCtx.EndWindow()
+		MuCtx.End()
+
+		Render(MuCtx)
+
 		wnd.SwapBuffers()
 
 	}

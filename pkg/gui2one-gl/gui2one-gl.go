@@ -136,6 +136,28 @@ func (a *App) FlushRects() {
 
 }
 
+func (a *App) ClearRects() {
+	a.MeshBuffer = NewGlMeshData()
+	m := a.MeshBuffer
+	gl.GenVertexArrays(1, &m.VAO)
+	gl.GenBuffers(1, &m.VBO)
+	gl.GenBuffers(1, &m.IndexBuffer)
+
+	stride := int32(a.SizeOfFloat32 * a.NumFloatsPerVertex)
+	gl.BindVertexArray(m.VAO)
+	gl.BindBuffer(gl.ARRAY_BUFFER, m.VBO)
+
+	/* position 2d */
+	gl.EnableVertexAttribArray(0)
+	gl.VertexAttribPointerWithOffset(0, 2, gl.FLOAT, false, stride, 0)
+	/* uvs */
+	gl.EnableVertexAttribArray(1)
+	gl.VertexAttribPointerWithOffset(1, 2, gl.FLOAT, false, stride, uintptr(2*a.SizeOfFloat32))
+	/* color RGB */
+	gl.EnableVertexAttribArray(2)
+	gl.VertexAttribPointerWithOffset(2, 3, gl.FLOAT, false, stride, uintptr((2+2)*a.SizeOfFloat32))
+}
+
 type GlMeshData struct {
 	Vertices    []float32
 	Indices     []uint32

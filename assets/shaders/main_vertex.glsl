@@ -8,6 +8,7 @@ uniform mat4 uProj;
 void main() {
 
     gl_Position = uProj * vec4(vec3(aPos,0.0), 1.0);
+    // gl_Position = vec4(vec3(aPos,0.0), 1.0);
     fUvs = aUvs;
     fColor = aColor;
 }
