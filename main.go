@@ -16,7 +16,10 @@ var myApp gui2onegl.App
 var Width = 512
 var Height = 512
 var MuCtx *microui.Context
+var Val1 float32 = 5
+var Text1 string = "0123456789"
 
+/* MicrUI "implementation" */
 func Render(ctx *microui.Context) {
 	gui2onegl.PrepareGLobalState(&myApp, Width, Height)
 	myApp.ClearRects()
@@ -168,17 +171,12 @@ func main() {
 
 		ctx.Begin()
 
-		if ctx.BeginWindow("Options", microui.NewRect(0, Height-100, 200, 100)) {
-			ctx.LayoutRow(1, []int{-1}, 0)
-			if ctx.Button("press me") {
-				fmt.Println("pressed")
-			}
-			ctx.EndWindow()
-		}
-
 		if ctx.BeginWindow("window 1", microui.NewRect(100, 100, 256, 400)) {
 			ctx.LayoutRow(1, []int{-1}, 0)
 			ctx.Label("hello there!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+			ctx.Slider(&Val1, 0.0, 10.0)
+			ctx.Text("Ici ... du texte")
+			ctx.TextBox(&Text1)
 			ctx.EndWindow()
 		}
 		if ctx.BeginWindow("window 2", microui.NewRect(200, 150, 1024, 400)) {
