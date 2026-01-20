@@ -25,6 +25,7 @@ func Render(ctx *microui.Context) {
 		switch cmd.Type {
 		case microui.MU_COMMAND_CLIP:
 			gui2onegl.DrawMyStuff(&myApp, Width, Height)
+			myApp.ClearRects()
 			myApp.SetScissor(cmd.Clip.Rect, Width, Height)
 
 		case microui.MU_COMMAND_RECT:
@@ -36,7 +37,7 @@ func Render(ctx *microui.Context) {
 			)
 
 		case microui.MU_COMMAND_TEXT:
-			// fmt.Println(cmd.Rect.Rect.X)
+
 			clr := cmd.Text.Color.ToRGBA()
 			myApp.PushText(
 				float32(cmd.Text.Pos.X),
@@ -51,7 +52,9 @@ func Render(ctx *microui.Context) {
 	gui2onegl.DrawMyStuff(&myApp, Width, Height)
 }
 func TextWidth(font microui.Font, text string) int {
-	return 150
+	w := myApp.ComputeTextWidth(text)
+	// fmt.Println("Width of ", text, " \nis ", w)
+	return w
 }
 func TextHeight(font microui.Font) int {
 	return myApp.AtlasData.FontMetrics.LineHeight
@@ -146,8 +149,14 @@ func main() {
 
 	gui2onegl.InitGL()
 	MuCtx = microui.NewContext()
+	// Create a handle that represents your font (it can be your Atlas struct)
+	myFontHandle := &myApp.AtlasData
+
+	// Assign it to the style
+	MuCtx.Style.Font = myFontHandle
 	MuCtx.TextHeight = TextHeight
 	MuCtx.TextWidth = TextWidth
+
 	initMyStuff()
 	gl.Viewport(0, 0, int32(Width), int32(Height))
 	glfw.SwapInterval(0)
@@ -160,7 +169,7 @@ func main() {
 		ctx.Begin()
 
 		if ctx.BeginWindow("Options", microui.NewRect(0, Height-100, 200, 100)) {
-
+			ctx.LayoutRow(1, []int{-1}, 0)
 			if ctx.Button("press me") {
 				fmt.Println("pressed")
 			}
@@ -168,13 +177,13 @@ func main() {
 		}
 
 		if ctx.BeginWindow("window 1", microui.NewRect(100, 100, 256, 400)) {
-
-			ctx.Label("hello there !!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+			ctx.LayoutRow(1, []int{-1}, 0)
+			ctx.Label("hello there!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 			ctx.EndWindow()
 		}
 		if ctx.BeginWindow("window 2", microui.NewRect(200, 150, 1024, 400)) {
-
-			ctx.Label("hello there !")
+			ctx.LayoutRow(1, []int{-1}, 0)
+			ctx.Label("bon merde alors ?")
 			ctx.EndWindow()
 		}
 		ctx.End()

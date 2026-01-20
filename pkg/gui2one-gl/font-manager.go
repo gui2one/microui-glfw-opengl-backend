@@ -57,6 +57,7 @@ func (m *FontMetrics) Print() {
 }
 
 type AtlasData struct {
+	FontSize    int
 	FontName    string
 	Width       int
 	Height      int
@@ -69,6 +70,7 @@ type AtlasData struct {
 
 func (a *AtlasData) Print(showGlyphs bool) {
 	fmt.Println("AtlasData ---->")
+	fmt.Println("  FontSize :", a.FontSize)
 	fmt.Println("  FontName :", a.FontName)
 	fmt.Println("  Width :", a.Width)
 	fmt.Println("  Height :", a.Height)
@@ -152,8 +154,8 @@ func rasterizeGlyph(font *sfnt.Font, idx sfnt.GlyphIndex, fontSize int) (*image.
 	// We want to translate the glyph so it fits in our [fontSize x fontSize] box.
 	// We subtract minX/minY to move the glyph's top-left to (0,0).
 	// Adding a small padding (like 2) is fine, but be careful not to exceed fontSize.
-	offsetX := -minX + 2
-	offsetY := -minY + 2
+	offsetX := -minX
+	offsetY := -minY
 
 	for _, seg := range segs {
 		// Helper to convert 26.6 Fixed to Float pixels
@@ -267,6 +269,7 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int, fontSize int) *Atlas
 
 	fontMetrics := getFontMetrics(font, fontSize)
 
+	result.FontSize = fontSize
 	result.FontName = path.Base(fontFilePath)
 	result.Width = finalDIM
 	result.Height = finalDIM

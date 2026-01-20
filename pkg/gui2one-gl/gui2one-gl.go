@@ -60,7 +60,7 @@ func (a *App) Init() {
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
 	// Texture ATLAS
-	atlasData := GenerateAtlas("assets/fonts/ConsolaMono-Bold.TTF", [2]int{0x0020, 0x007E}, 14)
+	atlasData := GenerateAtlas("assets/fonts/ConsolaMono-Bold.TTF", [2]int{0x0020, 0x007E}, 16)
 	a.AtlasData = *atlasData
 	a.AtlasTexture = *FromImage(atlasData.Atlas)
 	// atlasData.Print(true)
@@ -96,6 +96,8 @@ func (a *App) PushRect(x, y, w, h float32, uvs Rect, color [3]float32) {
 func (a *App) PushText(x, y float32, text string, color [3]float32) {
 	penX := x
 	penY := y
+
+	fontSize := a.AtlasData.FontSize
 	for _, c := range text {
 		if c == '\n' {
 			penX = x
@@ -112,16 +114,42 @@ func (a *App) PushText(x, y float32, text string, color [3]float32) {
 				P1: Point{X: uvStartX, Y: 1.0 - uvStartY},
 				P2: Point{X: uvStartX + uvW, Y: 1.0 - uvStartY - uvH},
 			}
+
+			charYOffset := fontSize - glyph.Height
 			// fmt.Println(uvsRect)
-			fm := a.AtlasData.FontMetrics
-			// ascent := a.AtlasData.FontMetrics.Ascent
-			drawY := penY - float32(glyph.Height-glyph.BearingY)
-			drawY += float32(fm.Ascent)
+			// fm := a.AtlasData.FontMetrics
+			// 1. Move from the top of the box to the baseline
+
+			// 2. Adjust for the specific glyph's offset from that baseline
+			// BearingY is how far ABOVE the baseline the character starts.
+			drawY := penY + float32(charYOffset)
 			a.PushRect(penX+float32(glyph.BearingX), drawY, float32(glyph.Width), float32(glyph.Height), uvsRect, color)
 			penX += float32(glyph.AdvanceX)
 
 		}
 	}
+}
+func (a *App) ComputeTextWidth(text string) int {
+	penX := 0
+	maxWidth := 0
+	curWidth := 0
+	for _, c := range text {
+		if c == '\n' {
+			penX = 0
+			curWidth = 0
+		}
+		if c >= 0x0020 && c <= 0x007E {
+			glyph := a.AtlasData.Glyphs[c-0x0020]
+			penX += int(glyph.AdvanceX)
+		}
+		curWidth = int(penX)
+		if curWidth > maxWidth {
+			maxWidth = curWidth
+		}
+	}
+
+	// fmt.Println("text : ", text, "\nwidth : ", maxWidth)
+	return maxWidth
 }
 func (a *App) FlushRects() {
 	m := a.MeshBuffer
@@ -145,11 +173,15 @@ func (a *App) ClearRects() {
 }
 func (app *App) SetScissor(r microui.Rect, width int, height int) {
 	// Convert top-left Y to bottom-left Y
+	x := r.X
+	y := height - (r.Y + r.H)
+	w := r.W
+	h := r.H
 	gl.Scissor(
-		int32(r.X),
-		int32(height-(r.Y+r.H)),
-		int32(r.W),
-		int32(r.H),
+		int32(x),
+		int32(y),
+		int32(w),
+		int32(h),
 	)
 	gl.Enable(gl.SCISSOR_TEST)
 }
@@ -201,12 +233,7 @@ func PrepareGLobalState(app *App, w, h int) {
 // DrawMyStuff draws my stuff
 func DrawMyStuff(app *App, w, h int) {
 	app.FlushRects()
-	// proj := mgl.Ortho2D(0, float32(w)/float32(h), 0, 1.0)
-
 	gl.DrawElements(gl.TRIANGLES, int32(len(app.MeshBuffer.Indices)), gl.UNSIGNED_INT, nil)
-
-	app.ClearRects()
-
 }
 
 func loadShaderSource(filename string) (string, error) {
