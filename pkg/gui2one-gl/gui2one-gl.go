@@ -60,7 +60,7 @@ func (a *App) Init() {
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
 	// Texture ATLAS
-	atlasData := GenerateAtlas("assets/fonts/ConsolaMono-Bold.TTF", [2]int{0x0020, 0x007E})
+	atlasData := GenerateAtlas("assets/fonts/ConsolaMono-Bold.TTF", [2]int{0x0020, 0x007E}, 24)
 	a.AtlasData = *atlasData
 	a.AtlasTexture = *FromImage(atlasData.Atlas)
 	// atlasData.Print(true)
@@ -139,25 +139,9 @@ func (a *App) FlushRects() {
 }
 
 func (a *App) ClearRects() {
-	a.MeshBuffer = NewGlMeshData()
-	m := a.MeshBuffer
-	gl.GenVertexArrays(1, &m.VAO)
-	gl.GenBuffers(1, &m.VBO)
-	gl.GenBuffers(1, &m.IndexBuffer)
 
-	stride := int32(a.SizeOfFloat32 * a.NumFloatsPerVertex)
-	gl.BindVertexArray(m.VAO)
-	gl.BindBuffer(gl.ARRAY_BUFFER, m.VBO)
-
-	/* position 2d */
-	gl.EnableVertexAttribArray(0)
-	gl.VertexAttribPointerWithOffset(0, 2, gl.FLOAT, false, stride, 0)
-	/* uvs */
-	gl.EnableVertexAttribArray(1)
-	gl.VertexAttribPointerWithOffset(1, 2, gl.FLOAT, false, stride, uintptr(2*a.SizeOfFloat32))
-	/* color RGB */
-	gl.EnableVertexAttribArray(2)
-	gl.VertexAttribPointerWithOffset(2, 3, gl.FLOAT, false, stride, uintptr((2+2)*a.SizeOfFloat32))
+	a.MeshBuffer.Vertices = a.MeshBuffer.Vertices[:0]
+	a.MeshBuffer.Indices = a.MeshBuffer.Indices[:0]
 }
 func (app *App) SetScissor(r microui.Rect, width int, height int) {
 	// Convert top-left Y to bottom-left Y
@@ -201,7 +185,7 @@ func DrawMyStuff(app *App, w, h int) {
 	app.FlushRects()
 	// proj := mgl.Ortho2D(0, float32(w)/float32(h), 0, 1.0)
 	proj := mgl.Ortho2D(0, float32(w), float32(h), 0)
-	gl.ClearColor(1.0, 0.0, 0.0, 1.0)
+	gl.ClearColor(0.65, 0.65, 0.65, 1.0)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 	gl.BindTexture(gl.TEXTURE_2D, app.AtlasTexture.ID)

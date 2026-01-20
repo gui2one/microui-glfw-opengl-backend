@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	gui2onegl "font-stuff/pkg/gui2one-gl"
-	"math/rand"
 	"path"
 
 	"runtime"
@@ -61,46 +60,58 @@ func initMyStuff() {
 	myApp.PushText(100, 256, "0123456789\ndefghijklmnopqrstuvwxyz/\n/;;\n;)", [3]float32{1.0, 1.0, 1.0})
 
 }
-func handleDrop(wnd *glfw.Window, paths []string) {
+func handleGLFWDrop(wnd *glfw.Window, paths []string) {
 	fmt.Println("Dropped", len(paths), "files")
 	fmt.Println(paths)
 	fmt.Println(myApp.AtlasTexture.Width)
 	first := paths[0]
 	if path.Ext(first) == ".ttf" || path.Ext(first) == ".TTF" {
-		atlas := gui2onegl.GenerateAtlas(first, [2]int{0x0020, 0x007E})
+		atlas := gui2onegl.GenerateAtlas(first, [2]int{0x0020, 0x007E}, 24)
 		gl.DeleteTextures(1, &myApp.AtlasTexture.ID)
 		myApp.AtlasTexture = *gui2onegl.FromImage(atlas.Atlas)
 	}
 }
-func handleResize(wnd *glfw.Window, width, height int) {
+func handleGLFWResize(wnd *glfw.Window, width, height int) {
 	Width = width
 	Height = height
 	gl.Viewport(0, 0, int32(Width), int32(Height))
 }
-func handleCursorPos(wnd *glfw.Window, x, y float64) {
+func handleGLFWCursorPos(wnd *glfw.Window, x, y float64) {
+	MuCtx.InputMouseMove(int(x), int(y))
+
 	action := wnd.GetMouseButton(glfw.MouseButton1)
 	if action == glfw.Press {
-		myApp.PushRect(
-			float32(x),
-			float32(float64(Height)-y),
-			rand.Float32()*100, rand.Float32()*100,
-			myApp.AtlasData.White,
-			[3]float32{rand.Float32(), rand.Float32(), rand.Float32()},
-		)
+
 	}
 }
-func handleMouseButton(wnd *glfw.Window, button glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
-	if action == glfw.Press {
-		x, y := wnd.GetCursorPos()
+func handleGLFWMouseButton(wnd *glfw.Window, button glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
 
-		myApp.PushRect(
-			float32(x),
-			float32(float64(Height)-y),
-			rand.Float32()*100, rand.Float32()*100,
-			myApp.AtlasData.White,
-			[3]float32{rand.Float32(), rand.Float32(), rand.Float32()},
-		)
+	// Map GLFW buttons to MicroUI buttons
+	var muBtn int
+	switch button {
+	case glfw.MouseButtonLeft:
+		muBtn = microui.MU_MOUSE_LEFT
+	case glfw.MouseButtonRight:
+		muBtn = microui.MU_MOUSE_RIGHT
+	case glfw.MouseButtonMiddle:
+		muBtn = microui.MU_MOUSE_MIDDLE
+	default:
+		return
 	}
+	switch action {
+	case glfw.Release:
+		x, y := wnd.GetCursorPos()
+		MuCtx.InputMouseUp(int(x), int(y), muBtn)
+	case glfw.Press:
+		x, y := wnd.GetCursorPos()
+		MuCtx.InputMouseDown(int(x), int(y), muBtn)
+
+	}
+
+}
+
+func handleKeyDown(key int) {
+	fmt.Println(key)
 }
 func main() {
 
@@ -116,10 +127,10 @@ func main() {
 	if err != nil {
 		panic("Unable to create GLFW window")
 	}
-	wnd.SetDropCallback(handleDrop)
-	wnd.SetFramebufferSizeCallback(handleResize)
-	wnd.SetCursorPosCallback(handleCursorPos)
-	wnd.SetMouseButtonCallback(handleMouseButton)
+	wnd.SetDropCallback(handleGLFWDrop)
+	wnd.SetFramebufferSizeCallback(handleGLFWResize)
+	wnd.SetCursorPosCallback(handleGLFWCursorPos)
+	wnd.SetMouseButtonCallback(handleGLFWMouseButton)
 
 	wnd.MakeContextCurrent()
 
@@ -130,12 +141,16 @@ func main() {
 	initMyStuff()
 	gl.Viewport(0, 0, int32(Width), int32(Height))
 	glfw.SwapInterval(0)
+
 	for !wnd.ShouldClose() {
 
-		glfw.WaitEvents()
+		glfw.PollEvents()
 
 		MuCtx.Begin()
 		MuCtx.BeginWindow("window 1", microui.NewRect(100, 100, 256, 400))
+		MuCtx.Label("hello there !")
+		MuCtx.EndWindow()
+		MuCtx.BeginWindow("window 2", microui.NewRect(200, 150, 1024, 400))
 		MuCtx.Label("hello there !")
 		MuCtx.EndWindow()
 		MuCtx.End()

@@ -186,7 +186,7 @@ func rasterizeGlyph(font *sfnt.Font, idx sfnt.GlyphIndex, fontSize int) (*image.
 	glypMetrics := getGlyphMetrics(font, idx, segs, fontSize)
 	return img, glypMetrics
 }
-func GenerateAtlas(fontFilePath string, glyphsRange [2]int) *AtlasData {
+func GenerateAtlas(fontFilePath string, glyphsRange [2]int, fontSize int) *AtlasData {
 
 	fontFile, err := os.ReadFile(fontFilePath)
 	if err != nil {
@@ -194,7 +194,6 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int) *AtlasData {
 		return nil
 	}
 	font, _ := sfnt.Parse(fontFile)
-	fontSize := int(32)
 
 	images := []*image.RGBA{}
 	glyphs_metrics := []*GlyphMetrics{}
@@ -229,17 +228,17 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int) *AtlasData {
 	// draw black cell into Atlas
 	draw.Draw(finalIMG, image.Rect(0, 0, fontSize, fontSize), image.Black, image.Point{}, draw.Src)
 	// draw white cell into Atlas
-	draw.Draw(finalIMG, image.Rect(fontSize*1, 0, fontSize*2, fontSize*2), image.White, image.Point{}, draw.Src) // TODO : fix height issue
+	draw.Draw(finalIMG, image.Rect(fontSize*1, 0, fontSize*2, fontSize), image.White, image.Point{}, draw.Src)
 
 	cellStep := float32(fontSize) / float32(finalDIM)
 	result.White = Rect{
 		P1: Point{
-			X: cellStep,
-			Y: (1 - cellStep),
+			X: cellStep + 0.02,
+			Y: (1 - cellStep) + 0.02, /* +0.01 = border issue with shading */
 		},
 		P2: Point{
-			X: cellStep * 2.0,
-			Y: (1),
+			X: cellStep*2.0 - 0.02,
+			Y: 0.98, /* should be 1 but border issue with shading */
 		},
 	}
 	for i, img := range images {
