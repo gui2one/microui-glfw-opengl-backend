@@ -60,7 +60,7 @@ func (a *App) Init() {
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
 	// Texture ATLAS
-	atlasData := GenerateAtlas("assets/fonts/ConsolaMono-Bold.TTF", [2]int{0x0020, 0x007E}, 24)
+	atlasData := GenerateAtlas("assets/fonts/ConsolaMono-Bold.TTF", [2]int{0x0020, 0x007E}, 14)
 	a.AtlasData = *atlasData
 	a.AtlasTexture = *FromImage(atlasData.Atlas)
 	// atlasData.Print(true)
@@ -116,7 +116,7 @@ func (a *App) PushText(x, y float32, text string, color [3]float32) {
 			fm := a.AtlasData.FontMetrics
 			// ascent := a.AtlasData.FontMetrics.Ascent
 			drawY := penY - float32(glyph.Height-glyph.BearingY)
-			drawY += float32(fm.LineHeight + fm.Descent)
+			drawY += float32(fm.Ascent)
 			a.PushRect(penX+float32(glyph.BearingX), drawY, float32(glyph.Width), float32(glyph.Height), uvsRect, color)
 			penX += float32(glyph.AdvanceX)
 

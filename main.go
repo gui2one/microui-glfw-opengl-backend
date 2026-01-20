@@ -54,7 +54,7 @@ func TextWidth(font microui.Font, text string) int {
 	return 150
 }
 func TextHeight(font microui.Font) int {
-	return 64
+	return myApp.AtlasData.FontMetrics.LineHeight
 }
 func initMyStuff() {
 
@@ -154,21 +154,32 @@ func main() {
 
 	for !wnd.ShouldClose() {
 
+		ctx := MuCtx
 		glfw.PollEvents()
 
-		MuCtx.Begin()
-		if MuCtx.BeginWindow("window 1", microui.NewRect(100, 100, 256, 400)) {
-			MuCtx.Label("hello there !!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-			MuCtx.EndWindow()
-		}
-		if MuCtx.BeginWindow("window 2", microui.NewRect(200, 150, 1024, 400)) {
+		ctx.Begin()
 
-			MuCtx.Label("hello there !")
-			MuCtx.EndWindow()
-		}
-		MuCtx.End()
+		if ctx.BeginWindow("Options", microui.NewRect(0, Height-100, 200, 100)) {
 
-		Render(MuCtx)
+			if ctx.Button("press me") {
+				fmt.Println("pressed")
+			}
+			ctx.EndWindow()
+		}
+
+		if ctx.BeginWindow("window 1", microui.NewRect(100, 100, 256, 400)) {
+
+			ctx.Label("hello there !!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+			ctx.EndWindow()
+		}
+		if ctx.BeginWindow("window 2", microui.NewRect(200, 150, 1024, 400)) {
+
+			ctx.Label("hello there !")
+			ctx.EndWindow()
+		}
+		ctx.End()
+
+		Render(ctx)
 
 		wnd.SwapBuffers()
 
