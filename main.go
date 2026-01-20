@@ -129,6 +129,30 @@ func handleGLFWMouseButton(wnd *glfw.Window, button glfw.MouseButton, action glf
 func handleKeyDown(key int) {
 	fmt.Println(key)
 }
+
+func handleGLFWKey(wnd *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
+	switch action {
+	case glfw.Press, glfw.Repeat:
+		switch key {
+		case glfw.KeyBackspace:
+			MuCtx.InputKeyDown(microui.MU_KEY_BACKSPACE)
+		case glfw.KeyEnter:
+			MuCtx.InputKeyDown(microui.MU_KEY_RETURN)
+			// Add other functional keys as needed
+		}
+	case glfw.Release:
+		switch key {
+		case glfw.KeyBackspace:
+			MuCtx.InputKeyUp(microui.MU_KEY_BACKSPACE)
+		case glfw.KeyEnter:
+			MuCtx.InputKeyUp(microui.MU_KEY_RETURN)
+		}
+	}
+
+}
+func handleGLFWChar(wnd *glfw.Window, char rune) {
+	MuCtx.InputText([]rune{char})
+}
 func main() {
 
 	runtime.LockOSThread()
@@ -147,7 +171,8 @@ func main() {
 	wnd.SetFramebufferSizeCallback(handleGLFWResize)
 	wnd.SetCursorPosCallback(handleGLFWCursorPos)
 	wnd.SetMouseButtonCallback(handleGLFWMouseButton)
-
+	wnd.SetKeyCallback(handleGLFWKey)
+	wnd.SetCharCallback(handleGLFWChar)
 	wnd.MakeContextCurrent()
 
 	gui2onegl.InitGL()
