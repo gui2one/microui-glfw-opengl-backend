@@ -6,8 +6,8 @@ out vec4 frag_color;
 void main() {
 
     vec4 tex = texture(uTexture, fUvs);
-    // frag_color = vec4(fUvs.x,fUvs.y,1.0,1.0);
-    frag_color = tex * vec4(fColor, 1.0);
-    // frag_color = vec4(fColor * tex.rgb , 1.0);
-
+    
+    float sharpAlpha = smoothstep(0.2, 0.8, tex.a);
+    frag_color = vec4(fColor, sharpAlpha);
+    // frag_color = tex * vec4(fColor, 1.0);
 }

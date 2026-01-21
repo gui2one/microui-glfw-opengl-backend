@@ -59,7 +59,7 @@ func Render(ctx *microui.Context) {
 					float32(cmd.Icon.Rect.Y),
 					float32(cmd.Icon.Rect.W),
 					float32(cmd.Icon.Rect.H),
-					myApp.AtlasData.White,
+					myApp.AtlasData.CloseIcon,
 					[3]float32{
 						float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
 

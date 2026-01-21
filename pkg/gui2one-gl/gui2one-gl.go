@@ -68,8 +68,6 @@ func (a *App) Init() {
 	// atlasData.Print(true)
 
 	a.AtlasTexture.Bind()
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
 
 }
 
