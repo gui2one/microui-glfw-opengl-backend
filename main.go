@@ -10,6 +10,7 @@ import (
 	"github.com/go-gl/gl/v4.6-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/zeozeozeo/microui-go"
+	mu "github.com/zeozeozeo/microui-go"
 )
 
 var myApp gui2onegl.App
@@ -176,6 +177,17 @@ type AppWindow struct {
 	Draw func()
 }
 
+func moveToFront(name string, windows []AppWindow) []AppWindow {
+	for i, w := range windows {
+		if w.Name == name {
+			// Remove from current position
+			windows = append(windows[:i], windows[i+1:]...)
+			// Add to the end (top)
+			return append(windows, w)
+		}
+	}
+	return windows
+}
 func main() {
 	Windows := []AppWindow{
 		{
@@ -184,6 +196,10 @@ func main() {
 		},
 		{
 			Name: "Options",
+			Draw: OptionsWindow,
+		},
+		{
+			Name: "Options2",
 			Draw: OptionsWindow,
 		},
 	}
@@ -224,38 +240,35 @@ func main() {
 	glfw.SwapInterval(0)
 
 	for !wnd.ShouldClose() {
+		windowToMove := ""
+		glfw.WaitEvents()
 
-		ctx := MuCtx
-		glfw.PollEvents()
-
-		ctx.Begin()
+		MuCtx.Begin()
 
 		for _, w := range Windows {
 
-			if ctx.BeginWindow(w.Name, microui.NewRect(50, 50, 100, 100)) {
+			if MuCtx.BeginWindow(w.Name, mu.NewRect(50, 50, 100, 100)) {
+				container := MuCtx.GetCurrentContainer()
+
+				if MuCtx.MousePressed == microui.MU_MOUSE_LEFT && MuCtx.HoverRoot == container {
+					windowToMove = w.Name
+				}
 				w.Draw()
-				ctx.EndWindow()
+
+				MuCtx.EndWindow()
 			}
 		}
-		// if ctx.BeginWindow("window 1", microui.NewRect(100, 100, 256, 400)) {
-		// 	ctx.LayoutRow(1, []int{-1}, 0)
-		// 	ctx.Label("hello there!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-		// 	ctx.Slider(&Val1, 0.0, 10.0)
-		// 	ctx.Text("Ici ... du texte")
-		// 	ctx.TextBox(&Text1)
-		// 	ctx.EndWindow()
-		// }
-		// if ctx.BeginWindow("window 2", microui.NewRect(200, 150, 1024, 400)) {
-		// 	ctx.LayoutRow(1, []int{-1}, 0)
-		// 	ctx.Label("bon merde alors ?")
-		// 	ctx.EndWindow()
-		// }
-		ctx.End()
 
-		Render(ctx)
+		MuCtx.End()
+
+		Render(MuCtx)
 
 		wnd.SwapBuffers()
 
+		if windowToMove != "" {
+			Windows = moveToFront(windowToMove, Windows)
+			windowToMove = ""
+		}
 	}
 
 	glfw.Terminate()
