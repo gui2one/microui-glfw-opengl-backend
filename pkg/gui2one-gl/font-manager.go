@@ -66,6 +66,7 @@ type AtlasData struct {
 	Glyphs      []*GlyphMetrics
 	GlyphsRange [2]int
 	// colors and icons
+	Black Rect
 	White Rect
 }
 
@@ -234,6 +235,16 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int, fontSize int) *Atlas
 	draw.Draw(finalIMG, image.Rect(fontSize*1, 0, fontSize*2, fontSize), image.White, image.Point{}, draw.Src)
 
 	cellStep := float32(fontSize) / float32(finalDIM)
+	result.Black = Rect{
+		P1: Point{
+			X: 0 + 0.02,
+			Y: (1 - cellStep) + 0.02, /* +0.01 = border issue with shading */
+		},
+		P2: Point{
+			X: cellStep*1.0 - 0.02,
+			Y: 0.98, /* should be 1 but border issue with shading */
+		},
+	}
 	result.White = Rect{
 		P1: Point{
 			X: cellStep + 0.02,

@@ -49,6 +49,61 @@ func Render(ctx *microui.Context) {
 				cmd.Text.Str,
 				[3]float32{
 					float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
+
+		case mu.MU_COMMAND_ICON:
+			switch cmd.Icon.Id {
+			case mu.MU_ICON_CLOSE:
+				clr := cmd.Icon.Color.ToRGBA()
+				myApp.PushRect(
+					float32(cmd.Icon.Rect.X),
+					float32(cmd.Icon.Rect.Y),
+					float32(cmd.Icon.Rect.W),
+					float32(cmd.Icon.Rect.H),
+					myApp.AtlasData.White,
+					[3]float32{
+						float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
+
+			case mu.MU_ICON_CHECK:
+				clr := cmd.Icon.Color.ToRGBA()
+				myApp.PushRect(
+					float32(cmd.Icon.Rect.X),
+					float32(cmd.Icon.Rect.Y),
+					float32(cmd.Icon.Rect.W),
+					float32(cmd.Icon.Rect.H),
+					myApp.AtlasData.White,
+					[3]float32{
+						float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
+			case mu.MU_ICON_COLLAPSED:
+				clr := cmd.Icon.Color.ToRGBA()
+				myApp.PushRect(
+					float32(cmd.Icon.Rect.X),
+					float32(cmd.Icon.Rect.Y),
+					float32(cmd.Icon.Rect.W),
+					float32(cmd.Icon.Rect.H),
+					myApp.AtlasData.White,
+					[3]float32{
+						float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
+			case mu.MU_ICON_EXPANDED:
+				clr := cmd.Icon.Color.ToRGBA()
+				myApp.PushRect(
+					float32(cmd.Icon.Rect.X),
+					float32(cmd.Icon.Rect.Y),
+					float32(cmd.Icon.Rect.W),
+					float32(cmd.Icon.Rect.H),
+					myApp.AtlasData.White,
+					[3]float32{
+						float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
+			case mu.MU_ICON_MAX:
+				clr := cmd.Icon.Color.ToRGBA()
+				myApp.PushRect(
+					float32(cmd.Icon.Rect.X),
+					float32(cmd.Icon.Rect.Y),
+					float32(cmd.Icon.Rect.W),
+					float32(cmd.Icon.Rect.H),
+					myApp.AtlasData.Black,
+					[3]float32{
+						float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
+			}
 		}
 
 	}
