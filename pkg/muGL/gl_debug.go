@@ -1,6 +1,6 @@
 //go:build gldebug
 
-package gui2onegl
+package muGL
 
 import (
 	"log"

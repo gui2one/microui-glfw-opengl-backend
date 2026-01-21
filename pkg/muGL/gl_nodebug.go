@@ -1,6 +1,6 @@
 //go:build !gldebug
 
-package gui2onegl
+package muGL
 
 func SetupGLDebug() {
 	// No-op in release builds

@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	gui2onegl "font-stuff/pkg/gui2one-gl"
+	muGL "font-stuff/pkg/muGL"
 	"path"
 
 	"runtime"
@@ -13,22 +13,23 @@ import (
 	mu "github.com/zeozeozeo/microui-go"
 )
 
-var myApp gui2onegl.App
+var myApp muGL.App
 var Width = 1280
 var Height = 720
 var MuCtx *microui.Context
 var Val1 float32 = 5
 var Text1 string = "0123456789"
+var Bool1 bool = false
 
 /* MicrUI "implementation" */
 func Render(ctx *microui.Context) {
-	gui2onegl.PrepareGLobalState(&myApp, Width, Height)
+	muGL.PrepareGLobalState(&myApp, Width, Height)
 	myApp.ClearRects()
 	gl.Disable(gl.SCISSOR_TEST) // Start with no scissor
 	for _, cmd := range ctx.CommandList {
 		switch cmd.Type {
 		case microui.MU_COMMAND_CLIP:
-			gui2onegl.DrawMyStuff(&myApp, Width, Height)
+			muGL.DrawMyStuff(&myApp, Width, Height)
 			myApp.ClearRects()
 			myApp.SetScissor(cmd.Clip.Rect, Width, Height)
 
@@ -108,7 +109,7 @@ func Render(ctx *microui.Context) {
 
 	}
 
-	gui2onegl.DrawMyStuff(&myApp, Width, Height)
+	muGL.DrawMyStuff(&myApp, Width, Height)
 }
 func TextWidth(font microui.Font, text string) int {
 	w := myApp.ComputeTextWidth(text)
@@ -138,9 +139,9 @@ func handleGLFWDrop(wnd *glfw.Window, paths []string) {
 	fmt.Println(myApp.AtlasTexture.Width)
 	first := paths[0]
 	if path.Ext(first) == ".ttf" || path.Ext(first) == ".TTF" {
-		atlas := gui2onegl.GenerateAtlas(first, gui2onegl.GLYPHS_RANGE, 18)
+		atlas := muGL.GenerateAtlas(first, muGL.GLYPHS_RANGE, 18)
 		gl.DeleteTextures(1, &myApp.AtlasTexture.ID)
-		myApp.AtlasTexture = *gui2onegl.FromImage(atlas.Atlas)
+		myApp.AtlasTexture = *muGL.FromImage(atlas.Atlas)
 	}
 }
 func handleGLFWResize(wnd *glfw.Window, width, height int) {
@@ -218,6 +219,7 @@ func MainWindow() {
 	MuCtx.Slider(&Val1, 0.0, 10.0)
 	MuCtx.Text("Ici ... du texte")
 	MuCtx.TextBox(&Text1)
+	MuCtx.Checkbox("Bool Value : ", &Bool1)
 }
 func OptionsWindow() {
 	MuCtx.LayoutRow(1, []int{-1}, 0)
@@ -281,7 +283,7 @@ func main() {
 	// OpenGL Starts here !!
 	wnd.MakeContextCurrent()
 
-	gui2onegl.InitGL()
+	muGL.InitGL()
 	MuCtx = microui.NewContext()
 
 	myFontHandle := &myApp.AtlasData

@@ -1,4 +1,4 @@
-package gui2onegl
+package muGL
 
 import (
 	"image"
