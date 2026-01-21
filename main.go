@@ -22,117 +22,105 @@ var Text1 string = "0123456789"
 var Bool1 bool = true
 
 /* MicrUI "implementation" */
-func Render(ctx *microui.Context) {
-	muGL.PrepareGLobalState(&myApp, Width, Height)
-	myApp.ClearRects()
-	gl.Disable(gl.SCISSOR_TEST) // Start with no scissor
-	for _, cmd := range ctx.CommandList {
-		switch cmd.Type {
-		case microui.MU_COMMAND_CLIP:
-			muGL.DrawMyStuff(&myApp, Width, Height)
-			myApp.ClearRects()
-			myApp.SetScissor(cmd.Clip.Rect, Width, Height)
+// func Render(ctx *microui.Context, app *muGL.App) {
+// 	muGL.PrepareGLobalState(app)
+// 	app.ClearRects()
+// 	gl.Disable(gl.SCISSOR_TEST) // Start with no scissor
+// 	for _, cmd := range ctx.CommandList {
+// 		switch cmd.Type {
+// 		case microui.MU_COMMAND_CLIP:
+// 			muGL.DrawMyStuff(app)
+// 			app.ClearRects()
+// 			app.SetScissor(cmd.Clip.Rect)
 
-		case microui.MU_COMMAND_RECT:
+// 		case microui.MU_COMMAND_RECT:
 
-			rgba := cmd.Rect.Color.ToRGBA()
-			myApp.PushRect(float32(cmd.Rect.Rect.X), float32(cmd.Rect.Rect.Y), float32(cmd.Rect.Rect.W), float32(cmd.Rect.Rect.H),
-				myApp.AtlasData.White,
-				[3]float32{float32(rgba.R) / 255.0, float32(rgba.G) / 255.0, float32(rgba.B) / 255.0},
-			)
+// 			rgba := cmd.Rect.Color.ToRGBA()
+// 			app.PushRect(float32(cmd.Rect.Rect.X), float32(cmd.Rect.Rect.Y), float32(cmd.Rect.Rect.W), float32(cmd.Rect.Rect.H),
+// 				app.AtlasData.White,
+// 				[3]float32{float32(rgba.R) / 255.0, float32(rgba.G) / 255.0, float32(rgba.B) / 255.0},
+// 			)
 
-		case microui.MU_COMMAND_TEXT:
+// 		case microui.MU_COMMAND_TEXT:
 
-			clr := cmd.Text.Color.ToRGBA()
-			myApp.PushText(
-				float32(cmd.Text.Pos.X),
-				float32(cmd.Text.Pos.Y),
-				cmd.Text.Str,
-				[3]float32{
-					float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
+// 			clr := cmd.Text.Color.ToRGBA()
+// 			app.PushText(
+// 				float32(cmd.Text.Pos.X),
+// 				float32(cmd.Text.Pos.Y),
+// 				cmd.Text.Str,
+// 				[3]float32{
+// 					float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
 
-		case mu.MU_COMMAND_ICON:
-			switch cmd.Icon.Id {
-			case mu.MU_ICON_CLOSE:
-				clr := cmd.Icon.Color.ToRGBA()
-				myApp.PushRect(
-					float32(cmd.Icon.Rect.X),
-					float32(cmd.Icon.Rect.Y),
-					float32(cmd.Icon.Rect.W),
-					float32(cmd.Icon.Rect.H),
-					myApp.AtlasData.CloseIcon,
-					[3]float32{
-						float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
+// 		case mu.MU_COMMAND_ICON:
+// 			switch cmd.Icon.Id {
+// 			case mu.MU_ICON_CLOSE:
+// 				clr := cmd.Icon.Color.ToRGBA()
+// 				app.PushRect(
+// 					float32(cmd.Icon.Rect.X),
+// 					float32(cmd.Icon.Rect.Y),
+// 					float32(cmd.Icon.Rect.W),
+// 					float32(cmd.Icon.Rect.H),
+// 					app.AtlasData.CloseIcon,
+// 					[3]float32{
+// 						float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
 
-			case mu.MU_ICON_CHECK:
-				clr := cmd.Icon.Color.ToRGBA()
-				myApp.PushRect(
-					float32(cmd.Icon.Rect.X),
-					float32(cmd.Icon.Rect.Y),
-					float32(cmd.Icon.Rect.W),
-					float32(cmd.Icon.Rect.H),
-					myApp.AtlasData.CheckedIcon,
-					[3]float32{
-						float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
-			case mu.MU_ICON_COLLAPSED:
-				clr := cmd.Icon.Color.ToRGBA()
-				myApp.PushRect(
-					float32(cmd.Icon.Rect.X),
-					float32(cmd.Icon.Rect.Y),
-					float32(cmd.Icon.Rect.W),
-					float32(cmd.Icon.Rect.H),
-					myApp.AtlasData.White,
-					[3]float32{
-						float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
-			case mu.MU_ICON_EXPANDED:
-				clr := cmd.Icon.Color.ToRGBA()
-				myApp.PushRect(
-					float32(cmd.Icon.Rect.X),
-					float32(cmd.Icon.Rect.Y),
-					float32(cmd.Icon.Rect.W),
-					float32(cmd.Icon.Rect.H),
-					myApp.AtlasData.White,
-					[3]float32{
-						float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
-			case mu.MU_ICON_MAX:
-				clr := cmd.Icon.Color.ToRGBA()
-				myApp.PushRect(
-					float32(cmd.Icon.Rect.X),
-					float32(cmd.Icon.Rect.Y),
-					float32(cmd.Icon.Rect.W),
-					float32(cmd.Icon.Rect.H),
-					myApp.AtlasData.Black,
-					[3]float32{
-						float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
-			}
-		}
+// 			case mu.MU_ICON_CHECK:
+// 				clr := cmd.Icon.Color.ToRGBA()
+// 				app.PushRect(
+// 					float32(cmd.Icon.Rect.X),
+// 					float32(cmd.Icon.Rect.Y),
+// 					float32(cmd.Icon.Rect.W),
+// 					float32(cmd.Icon.Rect.H),
+// 					app.AtlasData.CheckedIcon,
+// 					[3]float32{
+// 						float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
+// 			case mu.MU_ICON_COLLAPSED:
+// 				clr := cmd.Icon.Color.ToRGBA()
+// 				app.PushRect(
+// 					float32(cmd.Icon.Rect.X),
+// 					float32(cmd.Icon.Rect.Y),
+// 					float32(cmd.Icon.Rect.W),
+// 					float32(cmd.Icon.Rect.H),
+// 					app.AtlasData.White,
+// 					[3]float32{
+// 						float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
+// 			case mu.MU_ICON_EXPANDED:
+// 				clr := cmd.Icon.Color.ToRGBA()
+// 				app.PushRect(
+// 					float32(cmd.Icon.Rect.X),
+// 					float32(cmd.Icon.Rect.Y),
+// 					float32(cmd.Icon.Rect.W),
+// 					float32(cmd.Icon.Rect.H),
+// 					app.AtlasData.White,
+// 					[3]float32{
+// 						float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
+// 			case mu.MU_ICON_MAX:
+// 				clr := cmd.Icon.Color.ToRGBA()
+// 				app.PushRect(
+// 					float32(cmd.Icon.Rect.X),
+// 					float32(cmd.Icon.Rect.Y),
+// 					float32(cmd.Icon.Rect.W),
+// 					float32(cmd.Icon.Rect.H),
+// 					app.AtlasData.Black,
+// 					[3]float32{
+// 						float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
+// 			}
+// 		}
 
-	}
+// 	}
 
-	muGL.DrawMyStuff(&myApp, Width, Height)
-}
-func TextWidth(font microui.Font, text string) int {
-	w := myApp.ComputeTextWidth(text)
-	// fmt.Println("Width of ", text, " \nis ", w)
-	return w
-}
-func TextHeight(font microui.Font) int {
-	return myApp.AtlasData.FontMetrics.LineHeight
-}
-func initMyStuff() {
+// 	muGL.DrawMyStuff(app)
+// }
 
-	fmt.Println("Init App OpenGL Resources")
+// func TextWidth(font microui.Font, text string) int {
+// 	w := myApp.ComputeTextWidth(text)
+// 	// fmt.Println("Width of ", text, " \nis ", w)
+// 	return w
+// }
+// func TextHeight(font microui.Font) int {
+// 	return myApp.AtlasData.FontMetrics.LineHeight
+// }
 
-	myApp.Init()
-
-	// myApp.PushRect(10, 10, 512-20, 256-10,
-	// 	myApp.AtlasData.White,
-	// 	[3]float32{0.5, 0.2, 0.0},
-	// )
-
-	myApp.PushText(100, 256, "0123456789\ndefghijklmnopqrstuvwxyz/\n/;;\n;)", [3]float32{1.0, 1.0, 1.0})
-
-}
 func handleGLFWDrop(wnd *glfw.Window, paths []string) {
 	fmt.Println("Dropped", len(paths), "files")
 	fmt.Println(paths)
@@ -145,9 +133,9 @@ func handleGLFWDrop(wnd *glfw.Window, paths []string) {
 	}
 }
 func handleGLFWResize(wnd *glfw.Window, width, height int) {
-	Width = width
-	Height = height
-	gl.Viewport(0, 0, int32(Width), int32(Height))
+	myApp.Width = width
+	myApp.Height = height
+	gl.Viewport(0, 0, int32(myApp.Width), int32(myApp.Height))
 }
 func handleGLFWCursorPos(wnd *glfw.Window, x, y float64) {
 	MuCtx.InputMouseMove(int(x), int(y))
@@ -219,7 +207,7 @@ func MainWindow() {
 	MuCtx.Slider(&Val1, 0.0, 10.0)
 	MuCtx.Text("Ici ... du texte")
 	MuCtx.TextBox(&Text1)
-	MuCtx.Checkbox("Bool Value : ", &Bool1)
+	MuCtx.Checkbox("Bool Value", &Bool1)
 }
 func OptionsWindow() {
 	MuCtx.LayoutRow(1, []int{-1}, 0)
@@ -289,11 +277,13 @@ func main() {
 	myFontHandle := &myApp.AtlasData
 
 	MuCtx.Style.Font = myFontHandle
-	MuCtx.TextHeight = TextHeight
-	MuCtx.TextWidth = TextWidth
+	MuCtx.TextHeight = myApp.TextHeight
+	MuCtx.TextWidth = myApp.TextWidth
 
-	initMyStuff()
-	gl.Viewport(0, 0, int32(Width), int32(Height))
+	myApp.Init()
+	myApp.Width = Width
+	myApp.Height = Height
+	gl.Viewport(0, 0, int32(myApp.Width), int32(myApp.Height))
 	glfw.SwapInterval(0)
 
 	for !wnd.ShouldClose() {
@@ -318,7 +308,7 @@ func main() {
 
 		MuCtx.End()
 
-		Render(MuCtx)
+		myApp.Render(MuCtx)
 
 		wnd.SwapBuffers()
 

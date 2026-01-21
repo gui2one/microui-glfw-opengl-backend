@@ -2,6 +2,7 @@ package muGL
 
 import (
 	"fmt"
+
 	"log"
 	"os"
 	"strings"
@@ -9,6 +10,7 @@ import (
 	"github.com/go-gl/gl/v4.6-core/gl"
 	mgl "github.com/go-gl/mathgl/mgl32"
 	"github.com/zeozeozeo/microui-go"
+	mu "github.com/zeozeozeo/microui-go"
 )
 
 var GLYPHS_RANGE = [2]int{0x0020, 0x007E}
@@ -29,6 +31,9 @@ type App struct {
 	AtlasTexture       Texture
 	NumFloatsPerVertex int
 	SizeOfFloat32      int
+
+	Width  int
+	Height int
 }
 
 func (a *App) Init() {
@@ -70,7 +75,14 @@ func (a *App) Init() {
 	a.AtlasTexture.Bind()
 
 }
-
+func (a *App) TextWidth(font microui.Font, text string) int {
+	w := a.ComputeTextWidth(text)
+	// fmt.Println("Width of ", text, " \nis ", w)
+	return w
+}
+func (a *App) TextHeight(font microui.Font) int {
+	return a.AtlasData.FontMetrics.LineHeight
+}
 func (a *App) PushRect(x, y, w, h float32, uvs Rect, color [3]float32) {
 	m := a.MeshBuffer
 
@@ -175,10 +187,10 @@ func (a *App) ClearRects() {
 	a.MeshBuffer.Vertices = a.MeshBuffer.Vertices[:0]
 	a.MeshBuffer.Indices = a.MeshBuffer.Indices[:0]
 }
-func (app *App) SetScissor(r microui.Rect, width int, height int) {
+func (app *App) SetScissor(r microui.Rect) {
 	// Convert top-left Y to bottom-left Y
 	x := r.X
-	y := height - (r.Y + r.H)
+	y := app.Height - (r.Y + r.H)
 	w := r.W
 	h := r.H
 	gl.Scissor(
@@ -188,6 +200,96 @@ func (app *App) SetScissor(r microui.Rect, width int, height int) {
 		int32(h),
 	)
 	gl.Enable(gl.SCISSOR_TEST)
+}
+
+func (app *App) Render(ctx *microui.Context) {
+	PrepareGLobalState(app)
+	app.ClearRects()
+	gl.Disable(gl.SCISSOR_TEST) // Start with no scissor
+	for _, cmd := range ctx.CommandList {
+		switch cmd.Type {
+		case microui.MU_COMMAND_CLIP:
+			DrawMyStuff(app)
+			app.ClearRects()
+			app.SetScissor(cmd.Clip.Rect)
+
+		case microui.MU_COMMAND_RECT:
+
+			rgba := cmd.Rect.Color.ToRGBA()
+			app.PushRect(float32(cmd.Rect.Rect.X), float32(cmd.Rect.Rect.Y), float32(cmd.Rect.Rect.W), float32(cmd.Rect.Rect.H),
+				app.AtlasData.White,
+				[3]float32{float32(rgba.R) / 255.0, float32(rgba.G) / 255.0, float32(rgba.B) / 255.0},
+			)
+
+		case microui.MU_COMMAND_TEXT:
+
+			clr := cmd.Text.Color.ToRGBA()
+			app.PushText(
+				float32(cmd.Text.Pos.X),
+				float32(cmd.Text.Pos.Y),
+				cmd.Text.Str,
+				[3]float32{
+					float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
+
+		case mu.MU_COMMAND_ICON:
+			switch cmd.Icon.Id {
+			case mu.MU_ICON_CLOSE:
+				clr := cmd.Icon.Color.ToRGBA()
+				app.PushRect(
+					float32(cmd.Icon.Rect.X),
+					float32(cmd.Icon.Rect.Y),
+					float32(cmd.Icon.Rect.W),
+					float32(cmd.Icon.Rect.H),
+					app.AtlasData.CloseIcon,
+					[3]float32{
+						float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
+
+			case mu.MU_ICON_CHECK:
+				clr := cmd.Icon.Color.ToRGBA()
+				app.PushRect(
+					float32(cmd.Icon.Rect.X),
+					float32(cmd.Icon.Rect.Y),
+					float32(cmd.Icon.Rect.W),
+					float32(cmd.Icon.Rect.H),
+					app.AtlasData.CheckedIcon,
+					[3]float32{
+						float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
+			case mu.MU_ICON_COLLAPSED:
+				clr := cmd.Icon.Color.ToRGBA()
+				app.PushRect(
+					float32(cmd.Icon.Rect.X),
+					float32(cmd.Icon.Rect.Y),
+					float32(cmd.Icon.Rect.W),
+					float32(cmd.Icon.Rect.H),
+					app.AtlasData.White,
+					[3]float32{
+						float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
+			case mu.MU_ICON_EXPANDED:
+				clr := cmd.Icon.Color.ToRGBA()
+				app.PushRect(
+					float32(cmd.Icon.Rect.X),
+					float32(cmd.Icon.Rect.Y),
+					float32(cmd.Icon.Rect.W),
+					float32(cmd.Icon.Rect.H),
+					app.AtlasData.White,
+					[3]float32{
+						float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
+			case mu.MU_ICON_MAX:
+				clr := cmd.Icon.Color.ToRGBA()
+				app.PushRect(
+					float32(cmd.Icon.Rect.X),
+					float32(cmd.Icon.Rect.Y),
+					float32(cmd.Icon.Rect.W),
+					float32(cmd.Icon.Rect.H),
+					app.AtlasData.Black,
+					[3]float32{
+						float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
+			}
+		}
+
+	}
+
+	DrawMyStuff(app)
 }
 
 type GlMeshData struct {
@@ -216,8 +318,8 @@ type Rect struct {
 	P1, P2 Point
 }
 
-func PrepareGLobalState(app *App, w, h int) {
-	proj := mgl.Ortho2D(0, float32(w), float32(h), 0)
+func PrepareGLobalState(app *App) {
+	proj := mgl.Ortho2D(0, float32(app.Width), float32(app.Height), 0)
 	gl.ClearColor(0.65, 0.65, 0.65, 1.0)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
@@ -235,7 +337,7 @@ func PrepareGLobalState(app *App, w, h int) {
 }
 
 // DrawMyStuff draws my stuff
-func DrawMyStuff(app *App, w, h int) {
+func DrawMyStuff(app *App) {
 	app.FlushRects()
 	gl.DrawElements(gl.TRIANGLES, int32(len(app.MeshBuffer.Indices)), gl.UNSIGNED_INT, nil)
 }
