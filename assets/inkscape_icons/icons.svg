@@ -18,24 +18,24 @@
    xmlns:svg="http://www.w3.org/2000/svg">
   <sodipodi:namedview
      id="namedview1"
-     pagecolor="#ffffff"
+     pagecolor="#5b5b5b"
      bordercolor="#666666"
      borderopacity="1.0"
      inkscape:showpageshadow="2"
      inkscape:pageopacity="0.0"
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
-     inkscape:document-units="mm"
+     inkscape:document-units="px"
      inkscape:lockguides="true"
-     inkscape:zoom="8.1336326"
-     inkscape:cx="29.87595"
-     inkscape:cy="38.543664"
+     inkscape:zoom="15.139091"
+     inkscape:cx="30.649133"
+     inkscape:cy="32.069298"
      inkscape:window-width="1920"
      inkscape:window-height="1009"
      inkscape:window-x="-8"
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
-     inkscape:current-layer="layer3-8"
+     inkscape:current-layer="layer3"
      showgrid="true">
     <sodipodi:guide
        position="0,16.933333"
@@ -59,18 +59,19 @@
        inkscape:locked="true" />
     <inkscape:grid
        id="grid6"
-       units="mm"
-       originx="0"
-       originy="0"
-       spacingx="0.26458333"
-       spacingy="0.26458333"
+       units="px"
+       originx="8.4666662"
+       originy="8.4666662"
+       spacingx="1.0583333"
+       spacingy="1.0583333"
        empcolor="#0099e5"
        empopacity="0.30196078"
        color="#0099e5"
        opacity="0.14901961"
        empspacing="5"
        enabled="true"
-       visible="true" />
+       visible="true"
+       dotted="false" />
   </sodipodi:namedview>
   <defs
      id="defs1" />
@@ -102,9 +103,9 @@
      inkscape:groupmode="layer"
      id="layer3"
      inkscape:label="COLLAPSED_ICON"
-     style="display:none">
+     style="display:inline;stroke-width:2.11666667;stroke-dasharray:none;stroke:#ffffff;stroke-opacity:1">
     <path
-       style="fill:none;stroke:#ff4cf0;stroke-width:2.11667;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:none;stroke:#ffffff;stroke-width:2.11666667;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
        d="M 5.2210135,14.475624 11.141389,8.5552469 5.0746305,2.4884876"
        id="path2" />
   </g>
@@ -114,7 +115,7 @@
      inkscape:label="EXPANDED_ICON"
      transform="translate(-0.31212893,1.7448473)">
     <path
-       style="fill:none;stroke:#ff4cf0;stroke-width:2.11667;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       style="display:none;fill:none;stroke:#ff4cf0;stroke-width:2.11667;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
        d="M 2.5373036,4.4890771 8.4576807,10.409453 14.52444,4.3426941"
        id="path2-8" />
   </g>
