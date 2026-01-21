@@ -64,6 +64,7 @@ type AtlasData struct {
 	Atlas       *image.RGBA
 	FontMetrics *FontMetrics
 	Glyphs      []*GlyphMetrics
+	GlyphsRange [2]int
 	// colors and icons
 	White Rect
 }
@@ -275,6 +276,7 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int, fontSize int) *Atlas
 	result.Height = finalDIM
 	result.Atlas = finalIMG
 	result.FontMetrics = fontMetrics
+	result.GlyphsRange = glyphsRange
 	result.Glyphs = glyphs_metrics
 
 	return result

@@ -14,8 +14,8 @@ import (
 )
 
 var myApp gui2onegl.App
-var Width = 512
-var Height = 512
+var Width = 1280
+var Height = 720
 var MuCtx *microui.Context
 var Val1 float32 = 5
 var Text1 string = "0123456789"
@@ -83,7 +83,7 @@ func handleGLFWDrop(wnd *glfw.Window, paths []string) {
 	fmt.Println(myApp.AtlasTexture.Width)
 	first := paths[0]
 	if path.Ext(first) == ".ttf" || path.Ext(first) == ".TTF" {
-		atlas := gui2onegl.GenerateAtlas(first, [2]int{0x0020, 0x007E}, 24)
+		atlas := gui2onegl.GenerateAtlas(first, gui2onegl.GLYPHS_RANGE, 18)
 		gl.DeleteTextures(1, &myApp.AtlasTexture.ID)
 		myApp.AtlasTexture = *gui2onegl.FromImage(atlas.Atlas)
 	}
@@ -159,7 +159,7 @@ func handleGLFWScroll(wnd *glfw.Window, x, y float64) {
 }
 func MainWindow() {
 	MuCtx.LayoutRow(1, []int{-1}, 0)
-	MuCtx.Label("hello there!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+	MuCtx.Label("&&hello there!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 	MuCtx.Slider(&Val1, 0.0, 10.0)
 	MuCtx.Text("Ici ... du texte")
 	MuCtx.TextBox(&Text1)
@@ -245,9 +245,9 @@ func main() {
 
 		MuCtx.Begin()
 
-		for _, w := range Windows {
+		for i, w := range Windows {
 
-			if MuCtx.BeginWindow(w.Name, mu.NewRect(50, 50, 100, 100)) {
+			if MuCtx.BeginWindow(w.Name, mu.NewRect((i+1)*50, (i+1)*50, 200, 300)) {
 				container := MuCtx.GetCurrentContainer()
 
 				if MuCtx.MousePressed == microui.MU_MOUSE_LEFT && MuCtx.HoverRoot == container {

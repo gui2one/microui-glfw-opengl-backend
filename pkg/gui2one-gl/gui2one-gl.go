@@ -11,6 +11,8 @@ import (
 	"github.com/zeozeozeo/microui-go"
 )
 
+var GLYPHS_RANGE = [2]int{0x0020, 0x007E}
+
 func InitGL() {
 
 	if gl.Init() != nil {
@@ -60,7 +62,7 @@ func (a *App) Init() {
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
 	// Texture ATLAS
-	atlasData := GenerateAtlas("assets/fonts/ConsolaMono-Bold.TTF", [2]int{0x0020, 0x007E}, 16)
+	atlasData := GenerateAtlas("assets/fonts/ConsolaMono-Bold.TTF", GLYPHS_RANGE, 18)
 	a.AtlasData = *atlasData
 	a.AtlasTexture = *FromImage(atlasData.Atlas)
 	// atlasData.Print(true)
@@ -98,13 +100,14 @@ func (a *App) PushText(x, y float32, text string, color [3]float32) {
 	penY := y
 
 	fontSize := a.AtlasData.FontSize
+	glyphsRange := a.AtlasData.GlyphsRange
 	for _, c := range text {
 		if c == '\n' {
 			penX = x
 			penY += float32(a.AtlasData.FontMetrics.LineHeight)
 		}
-		if c >= 0x0020 && c <= 0x007E {
-			glyph := a.AtlasData.Glyphs[c-0x0020]
+		if c >= rune(glyphsRange[0]) && c <= rune(glyphsRange[1]) {
+			glyph := a.AtlasData.Glyphs[c-rune(glyphsRange[0])]
 
 			uvStartX := float32(glyph.X) / float32(a.AtlasData.Width)
 			uvStartY := float32(glyph.Y) / float32(a.AtlasData.Height)
@@ -133,13 +136,16 @@ func (a *App) ComputeTextWidth(text string) int {
 	penX := 0
 	maxWidth := 0
 	curWidth := 0
+	glyphsRange := a.AtlasData.GlyphsRange
+	startRune := rune(glyphsRange[0])
+	endRune := rune(glyphsRange[1])
 	for _, c := range text {
 		if c == '\n' {
 			penX = 0
 			curWidth = 0
 		}
-		if c >= 0x0020 && c <= 0x007E {
-			glyph := a.AtlasData.Glyphs[c-0x0020]
+		if c >= startRune && c <= endRune {
+			glyph := a.AtlasData.Glyphs[c-startRune]
 			penX += int(glyph.AdvanceX)
 		}
 		curWidth = int(penX)
