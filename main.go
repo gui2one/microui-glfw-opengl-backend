@@ -18,108 +18,13 @@ var Width = 1280
 var Height = 720
 var MuCtx *microui.Context
 var Val1 float32 = 5
-var Text1 string = "0123456789"
+var Text1 string = "text variable"
 var Bool1 bool = true
 
-/* MicrUI "implementation" */
-// func Render(ctx *microui.Context, app *muGL.App) {
-// 	muGL.PrepareGLobalState(app)
-// 	app.ClearRects()
-// 	gl.Disable(gl.SCISSOR_TEST) // Start with no scissor
-// 	for _, cmd := range ctx.CommandList {
-// 		switch cmd.Type {
-// 		case microui.MU_COMMAND_CLIP:
-// 			muGL.DrawMyStuff(app)
-// 			app.ClearRects()
-// 			app.SetScissor(cmd.Clip.Rect)
-
-// 		case microui.MU_COMMAND_RECT:
-
-// 			rgba := cmd.Rect.Color.ToRGBA()
-// 			app.PushRect(float32(cmd.Rect.Rect.X), float32(cmd.Rect.Rect.Y), float32(cmd.Rect.Rect.W), float32(cmd.Rect.Rect.H),
-// 				app.AtlasData.White,
-// 				[3]float32{float32(rgba.R) / 255.0, float32(rgba.G) / 255.0, float32(rgba.B) / 255.0},
-// 			)
-
-// 		case microui.MU_COMMAND_TEXT:
-
-// 			clr := cmd.Text.Color.ToRGBA()
-// 			app.PushText(
-// 				float32(cmd.Text.Pos.X),
-// 				float32(cmd.Text.Pos.Y),
-// 				cmd.Text.Str,
-// 				[3]float32{
-// 					float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
-
-// 		case mu.MU_COMMAND_ICON:
-// 			switch cmd.Icon.Id {
-// 			case mu.MU_ICON_CLOSE:
-// 				clr := cmd.Icon.Color.ToRGBA()
-// 				app.PushRect(
-// 					float32(cmd.Icon.Rect.X),
-// 					float32(cmd.Icon.Rect.Y),
-// 					float32(cmd.Icon.Rect.W),
-// 					float32(cmd.Icon.Rect.H),
-// 					app.AtlasData.CloseIcon,
-// 					[3]float32{
-// 						float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
-
-// 			case mu.MU_ICON_CHECK:
-// 				clr := cmd.Icon.Color.ToRGBA()
-// 				app.PushRect(
-// 					float32(cmd.Icon.Rect.X),
-// 					float32(cmd.Icon.Rect.Y),
-// 					float32(cmd.Icon.Rect.W),
-// 					float32(cmd.Icon.Rect.H),
-// 					app.AtlasData.CheckedIcon,
-// 					[3]float32{
-// 						float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
-// 			case mu.MU_ICON_COLLAPSED:
-// 				clr := cmd.Icon.Color.ToRGBA()
-// 				app.PushRect(
-// 					float32(cmd.Icon.Rect.X),
-// 					float32(cmd.Icon.Rect.Y),
-// 					float32(cmd.Icon.Rect.W),
-// 					float32(cmd.Icon.Rect.H),
-// 					app.AtlasData.White,
-// 					[3]float32{
-// 						float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
-// 			case mu.MU_ICON_EXPANDED:
-// 				clr := cmd.Icon.Color.ToRGBA()
-// 				app.PushRect(
-// 					float32(cmd.Icon.Rect.X),
-// 					float32(cmd.Icon.Rect.Y),
-// 					float32(cmd.Icon.Rect.W),
-// 					float32(cmd.Icon.Rect.H),
-// 					app.AtlasData.White,
-// 					[3]float32{
-// 						float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
-// 			case mu.MU_ICON_MAX:
-// 				clr := cmd.Icon.Color.ToRGBA()
-// 				app.PushRect(
-// 					float32(cmd.Icon.Rect.X),
-// 					float32(cmd.Icon.Rect.Y),
-// 					float32(cmd.Icon.Rect.W),
-// 					float32(cmd.Icon.Rect.H),
-// 					app.AtlasData.Black,
-// 					[3]float32{
-// 						float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
-// 			}
-// 		}
-
-// 	}
-
-// 	muGL.DrawMyStuff(app)
-// }
-
-// func TextWidth(font microui.Font, text string) int {
-// 	w := myApp.ComputeTextWidth(text)
-// 	// fmt.Println("Width of ", text, " \nis ", w)
-// 	return w
-// }
-// func TextHeight(font microui.Font) int {
-// 	return myApp.AtlasData.FontMetrics.LineHeight
-// }
+type AppWindow struct {
+	Name string
+	Draw func()
+}
 
 func handleGLFWDrop(wnd *glfw.Window, paths []string) {
 	fmt.Println("Dropped", len(paths), "files")
@@ -170,11 +75,9 @@ func handleGLFWMouseButton(wnd *glfw.Window, button glfw.MouseButton, action glf
 	}
 
 }
-
 func handleKeyDown(key int) {
 	fmt.Println(key)
 }
-
 func handleGLFWKey(wnd *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
 	switch action {
 	case glfw.Press, glfw.Repeat:
@@ -201,6 +104,7 @@ func handleGLFWChar(wnd *glfw.Window, char rune) {
 func handleGLFWScroll(wnd *glfw.Window, x, y float64) {
 	MuCtx.InputScroll(int(x), int(y))
 }
+
 func MainWindow() {
 	MuCtx.LayoutRow(1, []int{-1}, 0)
 	MuCtx.Label("&&hello there!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
@@ -215,11 +119,6 @@ func OptionsWindow() {
 
 	MuCtx.Text("Ici ... du texte")
 	MuCtx.TextBox(&Text1)
-}
-
-type AppWindow struct {
-	Name string
-	Draw func()
 }
 
 func moveToFront(name string, windows []AppWindow) []AppWindow {
