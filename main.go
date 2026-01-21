@@ -153,8 +153,40 @@ func handleGLFWKey(wnd *glfw.Window, key glfw.Key, scancode int, action glfw.Act
 func handleGLFWChar(wnd *glfw.Window, char rune) {
 	MuCtx.InputText([]rune{char})
 }
-func main() {
+func handleGLFWScroll(wnd *glfw.Window, x, y float64) {
+	MuCtx.InputScroll(int(x), int(y))
+}
+func MainWindow() {
+	MuCtx.LayoutRow(1, []int{-1}, 0)
+	MuCtx.Label("hello there!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+	MuCtx.Slider(&Val1, 0.0, 10.0)
+	MuCtx.Text("Ici ... du texte")
+	MuCtx.TextBox(&Text1)
+}
+func OptionsWindow() {
+	MuCtx.LayoutRow(1, []int{-1}, 0)
+	MuCtx.Label("options !!")
 
+	MuCtx.Text("Ici ... du texte")
+	MuCtx.TextBox(&Text1)
+}
+
+type AppWindow struct {
+	Name string
+	Draw func()
+}
+
+func main() {
+	Windows := []AppWindow{
+		{
+			Name: "Main",
+			Draw: MainWindow,
+		},
+		{
+			Name: "Options",
+			Draw: OptionsWindow,
+		},
+	}
 	runtime.LockOSThread()
 
 	if glfw.Init() != nil {
@@ -173,14 +205,16 @@ func main() {
 	wnd.SetMouseButtonCallback(handleGLFWMouseButton)
 	wnd.SetKeyCallback(handleGLFWKey)
 	wnd.SetCharCallback(handleGLFWChar)
+	wnd.SetScrollCallback(handleGLFWScroll)
+
+	// OpenGL Starts here !!
 	wnd.MakeContextCurrent()
 
 	gui2onegl.InitGL()
 	MuCtx = microui.NewContext()
-	// Create a handle that represents your font (it can be your Atlas struct)
+
 	myFontHandle := &myApp.AtlasData
 
-	// Assign it to the style
 	MuCtx.Style.Font = myFontHandle
 	MuCtx.TextHeight = TextHeight
 	MuCtx.TextWidth = TextWidth
@@ -196,19 +230,26 @@ func main() {
 
 		ctx.Begin()
 
-		if ctx.BeginWindow("window 1", microui.NewRect(100, 100, 256, 400)) {
-			ctx.LayoutRow(1, []int{-1}, 0)
-			ctx.Label("hello there!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-			ctx.Slider(&Val1, 0.0, 10.0)
-			ctx.Text("Ici ... du texte")
-			ctx.TextBox(&Text1)
-			ctx.EndWindow()
+		for _, w := range Windows {
+
+			if ctx.BeginWindow(w.Name, microui.NewRect(50, 50, 100, 100)) {
+				w.Draw()
+				ctx.EndWindow()
+			}
 		}
-		if ctx.BeginWindow("window 2", microui.NewRect(200, 150, 1024, 400)) {
-			ctx.LayoutRow(1, []int{-1}, 0)
-			ctx.Label("bon merde alors ?")
-			ctx.EndWindow()
-		}
+		// if ctx.BeginWindow("window 1", microui.NewRect(100, 100, 256, 400)) {
+		// 	ctx.LayoutRow(1, []int{-1}, 0)
+		// 	ctx.Label("hello there!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+		// 	ctx.Slider(&Val1, 0.0, 10.0)
+		// 	ctx.Text("Ici ... du texte")
+		// 	ctx.TextBox(&Text1)
+		// 	ctx.EndWindow()
+		// }
+		// if ctx.BeginWindow("window 2", microui.NewRect(200, 150, 1024, 400)) {
+		// 	ctx.LayoutRow(1, []int{-1}, 0)
+		// 	ctx.Label("bon merde alors ?")
+		// 	ctx.EndWindow()
+		// }
 		ctx.End()
 
 		Render(ctx)
