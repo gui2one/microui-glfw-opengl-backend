@@ -19,7 +19,7 @@ var Height = 720
 var MuCtx *microui.Context
 var Val1 float32 = 5
 var Text1 string = "0123456789"
-var Bool1 bool = false
+var Bool1 bool = true
 
 /* MicrUI "implementation" */
 func Render(ctx *microui.Context) {
@@ -71,7 +71,7 @@ func Render(ctx *microui.Context) {
 					float32(cmd.Icon.Rect.Y),
 					float32(cmd.Icon.Rect.W),
 					float32(cmd.Icon.Rect.H),
-					myApp.AtlasData.White,
+					myApp.AtlasData.CheckedIcon,
 					[3]float32{
 						float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
 			case mu.MU_ICON_COLLAPSED:

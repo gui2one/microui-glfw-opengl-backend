@@ -13,8 +13,6 @@ import (
 	"golang.org/x/image/font/sfnt"
 	"golang.org/x/image/math/fixed"
 	"golang.org/x/image/vector"
-
-	xdraw "golang.org/x/image/draw"
 )
 
 type GlyphMetrics struct {
@@ -68,9 +66,10 @@ type AtlasData struct {
 	Glyphs      []*GlyphMetrics
 	GlyphsRange [2]int
 	// colors and icons
-	Black     Rect
-	White     Rect
-	CloseIcon Rect
+	Black       Rect
+	White       Rect
+	CloseIcon   Rect
+	CheckedIcon Rect
 }
 
 func (a *AtlasData) Print(showGlyphs bool) {
@@ -194,17 +193,6 @@ func rasterizeGlyph(font *sfnt.Font, idx sfnt.GlyphIndex, fontSize int) (*image.
 	return img, glypMetrics
 }
 
-func getResizedIcon(src image.Image, width, height int) *image.RGBA {
-	// 1. Create the destination canvas with your desired size
-	dstRect := image.Rect(0, 0, width, height)
-	dst := image.NewRGBA(dstRect)
-
-	// 2. Scale the source image into the destination
-	// xdraw.BiLinear is a good balance between speed and quality
-	xdraw.BiLinear.Scale(dst, dstRect, src, src.Bounds(), xdraw.Src, nil)
-
-	return dst
-}
 func GenerateAtlas(fontFilePath string, glyphsRange [2]int, fontSize int) *AtlasData {
 
 	fontFile, err := os.ReadFile(fontFilePath)
@@ -280,20 +268,38 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int, fontSize int) *Atlas
 			Y: 1.0, /* should be 1 but border issue with shading */
 		},
 	}
+	result.CheckedIcon = Rect{
+		P1: Point{
+			X: cellStep * 3,
+			Y: 1.0, /* +0.01 = border issue with shading */
+		},
+		P2: Point{
+			X: cellStep * 4,
+			Y: (1 - cellStep), /* should be 1 but border issue with shading */
+		},
+	}
 
 	// add icons to atlas
-	closeImage, err := CloseIcon()
+	closeImage, err := LoadIcon("assets/icons/close.png")
 	if err != nil {
 		log.Println(err)
 		return nil
 	}
-	// 3. Convert any image.Image to RGBA safely
-	// bounds := closeImage.Bounds()
-	closeRGBA := getResizedIcon(closeImage, fontSize, fontSize)
-	// draw.Draw(closeRGBA, bounds, closeImage, bounds.Min, draw.Src)
-
+	iconRGBA := GetResizedIcon(closeImage, fontSize, fontSize)
 	draw.Draw(finalIMG, image.Rect(fontSize*2, 0, fontSize*3, fontSize),
-		closeRGBA,
+		iconRGBA,
+		image.Point{},
+		draw.Src,
+	)
+
+	checkedImage, err := LoadIcon("assets/icons/checked.png")
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+	iconRGBA = GetResizedIcon(checkedImage, fontSize, fontSize)
+	draw.Draw(finalIMG, image.Rect(fontSize*3, 0, fontSize*4, fontSize),
+		iconRGBA,
 		image.Point{},
 		draw.Src,
 	)
