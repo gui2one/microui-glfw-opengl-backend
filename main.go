@@ -268,6 +268,7 @@ func main() {
 		if windowToMove != "" {
 			Windows = moveToFront(windowToMove, Windows)
 			windowToMove = ""
+			glfw.PostEmptyEvent()
 		}
 	}
 
