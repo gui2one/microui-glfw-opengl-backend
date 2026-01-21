@@ -36,7 +36,7 @@ type App struct {
 	Height int
 }
 
-func (a *App) Init() {
+func (a *App) InitGL() {
 	a.NumFloatsPerVertex = 2 + 2 + 3
 	a.SizeOfFloat32 = 4
 
@@ -75,9 +75,16 @@ func (a *App) Init() {
 	a.AtlasTexture.Bind()
 
 }
+
+func (app *App) InitMuContext(ctx *microui.Context) {
+	myFontHandle := app.AtlasData
+
+	ctx.Style.Font = myFontHandle
+	ctx.TextHeight = app.TextHeight
+	ctx.TextWidth = app.TextWidth
+}
 func (a *App) TextWidth(font microui.Font, text string) int {
 	w := a.ComputeTextWidth(text)
-	// fmt.Println("Width of ", text, " \nis ", w)
 	return w
 }
 func (a *App) TextHeight(font microui.Font) int {
@@ -261,7 +268,7 @@ func (app *App) Render(ctx *microui.Context) {
 					float32(cmd.Icon.Rect.Y),
 					float32(cmd.Icon.Rect.W),
 					float32(cmd.Icon.Rect.H),
-					app.AtlasData.White,
+					app.AtlasData.CollapsedIcon,
 					[3]float32{
 						float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
 			case mu.MU_ICON_EXPANDED:
@@ -271,7 +278,7 @@ func (app *App) Render(ctx *microui.Context) {
 					float32(cmd.Icon.Rect.Y),
 					float32(cmd.Icon.Rect.W),
 					float32(cmd.Icon.Rect.H),
-					app.AtlasData.White,
+					app.AtlasData.ExpandedIcon,
 					[3]float32{
 						float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
 			case mu.MU_ICON_MAX:

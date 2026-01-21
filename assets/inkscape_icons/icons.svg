@@ -9,7 +9,7 @@
    id="svg1"
    inkscape:version="1.4 (86a8ad7, 2024-10-11)"
    sodipodi:docname="icons.svg"
-   inkscape:export-filename="..\icons\close.png"
+   inkscape:export-filename="..\icons\collapsed.png"
    inkscape:export-xdpi="135.91887"
    inkscape:export-ydpi="135.91887"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
@@ -35,7 +35,7 @@
      inkscape:window-x="-8"
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="layer3-8"
      showgrid="true">
     <sodipodi:guide
        position="0,16.933333"
@@ -75,16 +75,47 @@
   <defs
      id="defs1" />
   <g
-     inkscape:label="Layer 1"
+     inkscape:label="CLOSE ICON"
      inkscape:groupmode="layer"
-     id="layer1">
+     id="layer1"
+     style="display:none">
     <path
-       style="fill:none;stroke:#ffffff;stroke-width:2.11666667;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
+       style="fill:none;stroke:#000000;stroke-width:2.11667;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
        d="M 2.9485912,3.1890439 13.763095,13.931451"
        id="path4" />
     <path
-       style="fill:none;stroke:#ffffff;stroke-width:2.11666667;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
+       style="fill:none;stroke:#000000;stroke-width:2.11667;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
        d="M 13.835192,3.1409795 2.8524623,14.099677"
        id="path5" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="CHECKED ICON"
+     style="display:none">
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.11667;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       d="M 2.9601882,9.4335668 6.798674,14.18288 c 0,0 7.416735,-9.3359785 7.872149,-11.4503986"
+       id="path1" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="COLLAPSED_ICON"
+     style="display:none">
+    <path
+       style="fill:none;stroke:#ff4cf0;stroke-width:2.11667;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       d="M 5.2210135,14.475624 11.141389,8.5552469 5.0746305,2.4884876"
+       id="path2" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3-8"
+     inkscape:label="EXPANDED_ICON"
+     transform="translate(-0.31212893,1.7448473)">
+    <path
+       style="fill:none;stroke:#ff4cf0;stroke-width:2.11667;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       d="M 2.5373036,4.4890771 8.4576807,10.409453 14.52444,4.3426941"
+       id="path2-8" />
   </g>
 </svg>

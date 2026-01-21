@@ -66,10 +66,12 @@ type AtlasData struct {
 	Glyphs      []*GlyphMetrics
 	GlyphsRange [2]int
 	// colors and icons
-	Black       Rect
-	White       Rect
-	CloseIcon   Rect
-	CheckedIcon Rect
+	Black         Rect
+	White         Rect
+	CloseIcon     Rect
+	CheckedIcon   Rect
+	CollapsedIcon Rect
+	ExpandedIcon  Rect
 }
 
 func (a *AtlasData) Print(showGlyphs bool) {
@@ -278,6 +280,26 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int, fontSize int) *Atlas
 			Y: (1 - cellStep), /* should be 1 but border issue with shading */
 		},
 	}
+	result.CollapsedIcon = Rect{
+		P1: Point{
+			X: cellStep * 4,
+			Y: 1.0, /* +0.01 = border issue with shading */
+		},
+		P2: Point{
+			X: cellStep * 5,
+			Y: (1 - cellStep), /* should be 1 but border issue with shading */
+		},
+	}
+	result.ExpandedIcon = Rect{
+		P1: Point{
+			X: cellStep * 5,
+			Y: 1.0, /* +0.01 = border issue with shading */
+		},
+		P2: Point{
+			X: cellStep * 6,
+			Y: (1 - cellStep), /* should be 1 but border issue with shading */
+		},
+	}
 
 	// add icons to atlas
 	closeImage, err := LoadIcon("assets/icons/close.png")
@@ -299,6 +321,30 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int, fontSize int) *Atlas
 	}
 	iconRGBA = GetResizedIcon(checkedImage, fontSize, fontSize)
 	draw.Draw(finalIMG, image.Rect(fontSize*3, 0, fontSize*4, fontSize),
+		iconRGBA,
+		image.Point{},
+		draw.Src,
+	)
+
+	collapsedImage, err := LoadIcon("assets/icons/collapsed.png")
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+	iconRGBA = GetResizedIcon(collapsedImage, fontSize, fontSize)
+	draw.Draw(finalIMG, image.Rect(fontSize*4, 0, fontSize*5, fontSize),
+		iconRGBA,
+		image.Point{},
+		draw.Src,
+	)
+
+	expandedImage, err := LoadIcon("assets/icons/expanded.png")
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+	iconRGBA = GetResizedIcon(expandedImage, fontSize, fontSize)
+	draw.Draw(finalIMG, image.Rect(fontSize*5, 0, fontSize*6, fontSize),
 		iconRGBA,
 		image.Point{},
 		draw.Src,

@@ -112,6 +112,11 @@ func MainWindow() {
 	MuCtx.Text("Ici ... du texte")
 	MuCtx.TextBox(&Text1)
 	MuCtx.Checkbox("Bool Value", &Bool1)
+
+	if MuCtx.Header("header") {
+		MuCtx.Text("Ici ... du texte")
+		MuCtx.TextBox(&Text1)
+	}
 }
 func OptionsWindow() {
 	MuCtx.LayoutRow(1, []int{-1}, 0)
@@ -170,16 +175,13 @@ func main() {
 	// OpenGL Starts here !!
 	wnd.MakeContextCurrent()
 
-	muGL.InitGL()
 	MuCtx = microui.NewContext()
 
-	myFontHandle := &myApp.AtlasData
+	muGL.InitGL()
+	myApp.InitGL()
 
-	MuCtx.Style.Font = myFontHandle
-	MuCtx.TextHeight = myApp.TextHeight
-	MuCtx.TextWidth = myApp.TextWidth
+	myApp.InitMuContext(MuCtx)
 
-	myApp.Init()
 	myApp.Width = Width
 	myApp.Height = Height
 	gl.Viewport(0, 0, int32(myApp.Width), int32(myApp.Height))
@@ -192,7 +194,6 @@ func main() {
 		MuCtx.Begin()
 
 		for i, w := range Windows {
-
 			if MuCtx.BeginWindow(w.Name, mu.NewRect((i+1)*50, (i+1)*50, 200, 300)) {
 				container := MuCtx.GetCurrentContainer()
 
@@ -200,7 +201,6 @@ func main() {
 					windowToMove = w.Name
 				}
 				w.Draw()
-
 				MuCtx.EndWindow()
 			}
 		}
