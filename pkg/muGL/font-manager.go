@@ -156,24 +156,30 @@ func rasterizeGlyph(font *sfnt.Font, idx sfnt.GlyphIndex, fontSize int) (*image.
 	if err != nil {
 		panic(err)
 	}
+	// 1. Get the metrics in floating point
+	fAscent := float32(metrics.Ascent) / 64.0
+	fDescent := float32(metrics.Descent) / 64.0 // Distance below baseline
 
-	ascent := float32(metrics.Ascent) / 64.0
-	descent := float32(metrics.Descent) / 64.0
+	// 2. The height of the font 'line' is actually:
+	totalLineHeight := fAscent + fDescent
+	// ascent := float32(metrics.Ascent) / 64.0
+	// descent := float32(metrics.Descent) / 64.0
 
-	baselineY := ascent
+	// baselineY := ascent
 	// Calculate bounds in pixels (divide by 64)
-	b := segs.Bounds()
-	minX := float32(b.Min.X) / 64.0
+	// b := segs.Bounds()
+	// minX := float32(b.Min.X) / 64.0
 	// minY := float32(b.Min.Y) / 64.0
 	// maxY := float32(b.Max.Y) / 64.0
-
-	r := vector.NewRasterizer(fontSize, fontSize)
 
 	// We want to translate the glyph so it fits in our [fontSize x fontSize] box.
 	// We subtract minX/minY to move the glyph's top-left to (0,0).
 	// Adding a small padding (like 2) is fine, but be careful not to exceed fontSize.
-	offsetX := -minX
-	offsetY := baselineY - descent - 2
+	offsetX := float32(0.0)
+	offsetY := fAscent
+	canvasWidth := fontSize
+	canvasHeight := int(math.Ceil(float64(totalLineHeight))) + 1
+	r := vector.NewRasterizer(canvasWidth, canvasHeight)
 
 	for _, seg := range segs {
 		f := func(v fixed.Point26_6) (float32, float32) {
@@ -240,20 +246,21 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int, fontSize int) *Atlas
 	}
 	bufferNum := 30 /* number of empty spaces for White, icons and stuff */
 	numCols := int(math.Ceil(math.Sqrt(float64(len(images) + bufferNum))))
-	finalDIM := numCols * fontSize
-	finalIMG := image.NewRGBA(image.Rect(0, 0, int(finalDIM), int(finalDIM)))
+	finalWidth := numCols * fontSize
+	finalIMG := image.NewRGBA(image.Rect(0, 0, int(finalWidth), int(finalWidth)))
 
 	result := &AtlasData{}
-	step := int(fontSize)
-	startX := bufferNum % numCols * step
-	startY := bufferNum / numCols * step
+	stepX := int(fontSize)
+	stepY := int(fontMetrics.LineHeight)
+	startX := bufferNum % numCols * stepX
+	startY := bufferNum / numCols * stepY
 
 	// draw black cell into Atlas
 	draw.Draw(finalIMG, image.Rect(0, 0, fontSize, fontSize), image.Black, image.Point{}, draw.Src)
 	// draw white cell into Atlas
 	draw.Draw(finalIMG, image.Rect(fontSize*1, 0, fontSize*2, fontSize), image.White, image.Point{}, draw.Src)
 
-	cellStep := float32(fontSize) / float32(finalDIM)
+	cellStep := float32(fontSize) / float32(finalWidth)
 	result.Black = Rect{
 		P1: Point{
 			X: 0 + 0.02,
@@ -375,10 +382,10 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int, fontSize int) *Atlas
 		glyphs_metrics[i].Y = startY
 
 		// prepare newt step
-		startX += step
-		if startX >= int(finalDIM) {
+		startX += stepX
+		if startX >= int(finalWidth) {
 			startX = 0
-			startY += step
+			startY += stepY
 		}
 	}
 
@@ -389,8 +396,8 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int, fontSize int) *Atlas
 
 	result.FontSize = fontSize
 	result.FontName = path.Base(fontFilePath)
-	result.Width = finalDIM
-	result.Height = finalDIM
+	result.Width = finalWidth
+	result.Height = finalWidth
 	result.Atlas = finalIMG
 	result.FontMetrics = fontMetrics
 	result.GlyphsRange = glyphsRange
