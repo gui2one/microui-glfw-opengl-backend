@@ -107,22 +107,23 @@ func handleGLFWScroll(wnd *glfw.Window, x, y float64) {
 
 func MainWindow() {
 	MuCtx.LayoutRow(1, []int{-1}, 0)
-	MuCtx.Label("&&hello there!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+	MuCtx.Label("This is a label")
 	MuCtx.Slider(&Val1, 0.0, 10.0)
 	MuCtx.Text("Ici ... du texte")
 	MuCtx.TextBox(&Text1)
 	MuCtx.Checkbox("Bool Value", &Bool1)
 
-	if MuCtx.Header("header") {
-		MuCtx.Text("Ici ... du texte")
+	if MuCtx.Header("Collapsible Header") {
+		MuCtx.Text("encore du texte")
+		MuCtx.PushID([]byte("id1"))
 		MuCtx.TextBox(&Text1)
+		MuCtx.PopID()
+
 	}
 }
 func OptionsWindow() {
 	MuCtx.LayoutRow(1, []int{-1}, 0)
-	MuCtx.Label("options !!")
-
-	MuCtx.Text("Ici ... du texte")
+	MuCtx.Slider(&Val1, 0.0, 10.0)
 	MuCtx.TextBox(&Text1)
 }
 
@@ -207,6 +208,8 @@ func main() {
 
 		MuCtx.End()
 
+		gl.ClearColor(1.0, 0.0, 0.0, 1.0)
+		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 		myApp.Render(MuCtx)
 
 		wnd.SwapBuffers()

@@ -114,13 +114,17 @@ func (a *App) PushRect(x, y, w, h float32, uvs Rect, color [3]float32) {
 }
 func (a *App) PushText(x, y float32, text string, color [3]float32) {
 	penX := x
-	penY := y
+	penY := y + float32(a.AtlasData.FontMetrics.Descent)
 
 	glyphsRange := a.AtlasData.GlyphsRange
 	for _, c := range text {
 		if c == '\n' {
 			penX = x
 			penY += float32(a.AtlasData.FontMetrics.LineHeight)
+		}
+		if c == ' ' {
+			penX += float32(a.AtlasData.FontSize / 3)
+			continue
 		}
 		if c >= rune(glyphsRange[0]) && c <= rune(glyphsRange[1]) {
 			glyph := a.AtlasData.Glyphs[c-rune(glyphsRange[0])]
@@ -319,8 +323,6 @@ type Rect struct {
 
 func PrepareGLobalState(app *App) {
 	proj := mgl.Ortho2D(0, float32(app.Width), float32(app.Height), 0)
-	gl.ClearColor(0.65, 0.65, 0.65, 1.0)
-	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 	gl.BindTexture(gl.TEXTURE_2D, app.AtlasTexture.ID)
 
