@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 
+	_font "golang.org/x/image/font" // This contains the Hinting constants
 	"golang.org/x/image/font/sfnt"
 	"golang.org/x/image/math/fixed"
 	"golang.org/x/image/vector"
@@ -86,10 +87,10 @@ func (a *AtlasData) Print(showGlyphs bool) {
 	if showGlyphs {
 
 		for _, g := range a.Glyphs {
-			fmt.Println("    GlyphMetrics --")
+			fmt.Printf("    GlyphMetrics -- %c\n", g.UnicodeID)
 			fmt.Println("      IDX :", g.IDX)
 
-			fmt.Printf("      UnicodeID : 0x%04x --> %c\n", g.UnicodeID, g.UnicodeID)
+			fmt.Printf("      UnicodeID : 0x%04x : %c\n", g.UnicodeID, g.UnicodeID)
 			fmt.Println("      Coords :", g.X, g.Y)
 
 			fmt.Println("      AdvanceX :", g.AdvanceX)
@@ -119,30 +120,31 @@ func getFontMetrics(font *sfnt.Font, fontSize int) *FontMetrics {
 
 func getGlyphMetrics(font *sfnt.Font, glyphIndex sfnt.GlyphIndex, segs sfnt.Segments, fontSize int) *GlyphMetrics {
 	buf := new(sfnt.Buffer)
-	adv, _ := font.GlyphAdvance(buf, glyphIndex, fixed.Int26_6(fontSize<<6), 0)
 
+	// 1. Calculate scale (assuming 72 DPI for simplicity, or pass DPI as a param)
+	// fixed.I(x) is shorthand for x << 6
+	scale := fixed.I(fontSize)
+
+	// 2. Get Advance
+	adv, _ := font.GlyphAdvance(buf, glyphIndex, scale, _font.HintingNone)
+
+	// 3. Get Bounds once
 	bounds := segs.Bounds()
 
-	bearingX := bounds.Min.X.Ceil()
-	bearingY := bounds.Max.Y.Ceil()
+	// 4. Calculate dimensions using Ceil/Floor appropriately
+	// Use Floor for Min and Ceil for Max to ensure the glyph fits
+	// entirely within the integer pixel boundaries.
+	minX, maxX := bounds.Min.X.Floor(), bounds.Max.X.Ceil()
+	minY, maxY := bounds.Min.Y.Floor(), bounds.Max.Y.Ceil()
 
-	minX := segs.Bounds().Min.X.Ceil()
-	maxX := segs.Bounds().Max.X.Ceil()
-
-	minY := segs.Bounds().Min.Y.Ceil()
-	maxY := segs.Bounds().Max.Y.Ceil()
-
-	glyphHeight := maxY - minY
-	glyphWidth := maxX - minX
 	return &GlyphMetrics{
 		IDX:      glyphIndex,
 		AdvanceX: adv.Ceil(),
-		BearingX: bearingX,
-		BearingY: bearingY,
-		Width:    glyphWidth,
-		Height:   glyphHeight,
+		BearingX: minX,
+		BearingY: maxY, // Usually the offset from baseline to top
+		Width:    maxX - minX,
+		Height:   maxY - minY,
 	}
-
 }
 
 func rasterizeGlyph(font *sfnt.Font, idx sfnt.GlyphIndex, fontSize int) (*image.RGBA, *GlyphMetrics) {
@@ -370,7 +372,7 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int, fontSize int) *Atlas
 		)
 		draw.Draw(finalIMG, dstRect, img, image.Point{}, draw.Src)
 		glyphs_metrics[i].X = startX
-		glyphs_metrics[i].Y = startY + fontMetrics.Descent
+		glyphs_metrics[i].Y = startY
 
 		// prepare newt step
 		startX += step
