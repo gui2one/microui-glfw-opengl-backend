@@ -72,6 +72,8 @@ func (a *App) InitGL() {
 	a.AtlasTexture = *FromImage(atlasData.Atlas)
 	atlasData.Print(true)
 
+	// panic("OK stop here !!!!")
+
 	a.AtlasTexture.Bind()
 
 }
@@ -129,14 +131,14 @@ func (a *App) PushText(x, y float32, text string, color [3]float32) {
 			uvStartX := float32(glyph.X) / float32(a.AtlasData.Width)
 			uvStartY := float32(glyph.Y) / float32(a.AtlasData.Height)
 			uvW := float32(glyph.Width) / float32(a.AtlasData.Width)
-			uvH := float32(glyph.Height-glyph.BearingY) / float32(a.AtlasData.Height)
+			uvH := float32(glyph.Height) / float32(a.AtlasData.Height)
 			uvsRect := Rect{
 				P1: Point{X: uvStartX, Y: 1.0 - uvStartY},
 				P2: Point{X: uvStartX + uvW, Y: 1.0 - uvStartY - uvH},
 			}
 
 			drawY := penY
-			a.PushRect(penX+float32(glyph.BearingX), drawY, float32(glyph.Width), float32(glyph.Height), uvsRect, color)
+			a.PushRect(penX+float32(glyph.BearingX), drawY, float32(glyph.Width), float32(a.AtlasData.FontSize), uvsRect, color)
 			penX += float32(glyph.AdvanceX)
 
 		}
@@ -208,10 +210,10 @@ func (app *App) Render(ctx *microui.Context) {
 	gl.Disable(gl.SCISSOR_TEST) // Start with no scissor
 	for _, cmd := range ctx.CommandList {
 		switch cmd.Type {
-		// case microui.MU_COMMAND_CLIP:
-		// 	DrawMyStuff(app)
-		// 	app.ClearRects()
-		// 	app.SetScissor(cmd.Clip.Rect)
+		case microui.MU_COMMAND_CLIP:
+			DrawMyStuff(app)
+			app.ClearRects()
+			app.SetScissor(cmd.Clip.Rect)
 
 		case microui.MU_COMMAND_RECT:
 

@@ -162,21 +162,9 @@ func rasterizeGlyph(font *sfnt.Font, idx sfnt.GlyphIndex, fontSize int) (*image.
 
 	// 2. The height of the font 'line' is actually:
 	totalLineHeight := fAscent + fDescent
-	// ascent := float32(metrics.Ascent) / 64.0
-	// descent := float32(metrics.Descent) / 64.0
 
-	// baselineY := ascent
-	// Calculate bounds in pixels (divide by 64)
-	// b := segs.Bounds()
-	// minX := float32(b.Min.X) / 64.0
-	// minY := float32(b.Min.Y) / 64.0
-	// maxY := float32(b.Max.Y) / 64.0
-
-	// We want to translate the glyph so it fits in our [fontSize x fontSize] box.
-	// We subtract minX/minY to move the glyph's top-left to (0,0).
-	// Adding a small padding (like 2) is fine, but be careful not to exceed fontSize.
 	offsetX := float32(0.0)
-	offsetY := fAscent
+	offsetY := fAscent - fDescent
 	canvasWidth := fontSize
 	canvasHeight := int(math.Ceil(float64(totalLineHeight))) + 1
 	r := vector.NewRasterizer(canvasWidth, canvasHeight)
@@ -209,7 +197,7 @@ func rasterizeGlyph(font *sfnt.Font, idx sfnt.GlyphIndex, fontSize int) (*image.
 
 	glypMetrics := getGlyphMetrics(font, idx, segs, fontSize)
 
-	img := image.NewRGBA(image.Rect(0, 0, fontSize, fontSize))
+	img := image.NewRGBA(image.Rect(0, 0, fontSize, int(totalLineHeight)))
 	r.Draw(img, img.Bounds(), image.White, image.Point{})
 
 	return img, glypMetrics
@@ -246,79 +234,81 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int, fontSize int) *Atlas
 	}
 	bufferNum := 30 /* number of empty spaces for White, icons and stuff */
 	numCols := int(math.Ceil(math.Sqrt(float64(len(images) + bufferNum))))
-	finalWidth := numCols * fontSize
-	finalIMG := image.NewRGBA(image.Rect(0, 0, int(finalWidth), int(finalWidth)))
+	stepX := int(fontSize)
+	stepY := int(fontMetrics.Ascent + fontMetrics.Descent)
+	finalWidth := numCols * stepX
+	finalHeight := numCols * stepY
+	finalIMG := image.NewRGBA(image.Rect(0, 0, int(finalWidth), int(finalHeight)))
 
 	result := &AtlasData{}
-	stepX := int(fontSize)
-	stepY := int(fontMetrics.LineHeight)
 	startX := bufferNum % numCols * stepX
 	startY := bufferNum / numCols * stepY
 
 	// draw black cell into Atlas
-	draw.Draw(finalIMG, image.Rect(0, 0, fontSize, fontSize), image.Black, image.Point{}, draw.Src)
+	draw.Draw(finalIMG, image.Rect(0, 0, stepX, stepY), image.Black, image.Point{}, draw.Src)
 	// draw white cell into Atlas
-	draw.Draw(finalIMG, image.Rect(fontSize*1, 0, fontSize*2, fontSize), image.White, image.Point{}, draw.Src)
+	draw.Draw(finalIMG, image.Rect(stepX*1, 0, stepX*2, stepY), image.White, image.Point{}, draw.Src)
 
-	cellStep := float32(fontSize) / float32(finalWidth)
+	cellStepX := float32(fontSize) / float32(finalWidth)
+	cellStepY := float32(fontSize) / float32(finalHeight)
 	result.Black = Rect{
 		P1: Point{
 			X: 0 + 0.02,
-			Y: (1 - cellStep) + 0.02, /* +0.01 = border issue with shading */
+			Y: (1 - cellStepY) + 0.02, /* +0.01 = border issue with shading */
 		},
 		P2: Point{
-			X: cellStep*1.0 - 0.02,
+			X: cellStepX*1.0 - 0.02,
 			Y: 0.98, /* should be 1 but border issue with shading */
 		},
 	}
 	result.White = Rect{
 		P1: Point{
-			X: cellStep + 0.02,
-			Y: (1 - cellStep) + 0.02, /* +0.01 = border issue with shading */
+			X: cellStepX + 0.02,
+			Y: (1 - cellStepY) + 0.02, /* +0.01 = border issue with shading */
 		},
 		P2: Point{
-			X: cellStep*2.0 - 0.02,
+			X: cellStepX*2.0 - 0.02,
 			Y: 0.98, /* should be 1 but border issue with shading */
 		},
 	}
 	result.CloseIcon = Rect{
 		P1: Point{
-			X: cellStep * 2,
-			Y: (1 - cellStep), /* +0.01 = border issue with shading */
+			X: cellStepX * 2,
+			Y: (1 - cellStepY), /* +0.01 = border issue with shading */
 		},
 		P2: Point{
-			X: cellStep * 3.0,
+			X: cellStepX * 3.0,
 			Y: 1.0, /* should be 1 but border issue with shading */
 		},
 	}
 	result.CheckedIcon = Rect{
 		P1: Point{
-			X: cellStep * 3,
+			X: cellStepX * 3,
 			Y: 1.0, /* +0.01 = border issue with shading */
 		},
 		P2: Point{
-			X: cellStep * 4,
-			Y: (1 - cellStep), /* should be 1 but border issue with shading */
+			X: cellStepX * 4,
+			Y: (1 - cellStepY), /* should be 1 but border issue with shading */
 		},
 	}
 	result.CollapsedIcon = Rect{
 		P1: Point{
-			X: cellStep * 4,
+			X: cellStepX * 4,
 			Y: 1.0, /* +0.01 = border issue with shading */
 		},
 		P2: Point{
-			X: cellStep * 5,
-			Y: (1 - cellStep), /* should be 1 but border issue with shading */
+			X: cellStepX * 5,
+			Y: (1 - cellStepY), /* should be 1 but border issue with shading */
 		},
 	}
 	result.ExpandedIcon = Rect{
 		P1: Point{
-			X: cellStep * 5,
+			X: cellStepX * 5,
 			Y: 1.0, /* +0.01 = border issue with shading */
 		},
 		P2: Point{
-			X: cellStep * 6,
-			Y: (1 - cellStep), /* should be 1 but border issue with shading */
+			X: cellStepX * 6,
+			Y: (1 - cellStepY), /* should be 1 but border issue with shading */
 		},
 	}
 
@@ -397,7 +387,7 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int, fontSize int) *Atlas
 	result.FontSize = fontSize
 	result.FontName = path.Base(fontFilePath)
 	result.Width = finalWidth
-	result.Height = finalWidth
+	result.Height = finalHeight
 	result.Atlas = finalIMG
 	result.FontMetrics = fontMetrics
 	result.GlyphsRange = glyphsRange
