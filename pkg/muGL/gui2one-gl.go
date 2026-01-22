@@ -67,7 +67,7 @@ func (a *App) InitGL() {
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
 	// Texture ATLAS
-	atlasData := GenerateAtlas("assets/fonts/ConsolaMono-Bold.TTF", GLYPHS_RANGE, 36)
+	atlasData := GenerateAtlas("assets/fonts/ConsolaMono-Bold.TTF", GLYPHS_RANGE, 18)
 	a.AtlasData = *atlasData
 	a.AtlasTexture = *FromImage(atlasData.Atlas)
 	atlasData.Print(true)
@@ -130,15 +130,15 @@ func (a *App) PushText(x, y float32, text string, color [3]float32) {
 
 			uvStartX := float32(glyph.X) / float32(a.AtlasData.Width)
 			uvStartY := float32(glyph.Y) / float32(a.AtlasData.Height)
-			uvW := float32(glyph.Width) / float32(a.AtlasData.Width)
-			uvH := float32(glyph.Height) / float32(a.AtlasData.Height)
+			uvW := float32(a.AtlasData.FontSize) / float32(a.AtlasData.Width)
+			uvH := float32(a.AtlasData.FontSize) / float32(a.AtlasData.Height)
 			uvsRect := Rect{
 				P1: Point{X: uvStartX, Y: 1.0 - uvStartY},
 				P2: Point{X: uvStartX + uvW, Y: 1.0 - uvStartY - uvH},
 			}
 
 			drawY := penY
-			a.PushRect(penX+float32(glyph.BearingX), drawY, float32(glyph.Width), float32(a.AtlasData.FontSize), uvsRect, color)
+			a.PushRect(penX+float32(glyph.BearingX), drawY, float32(a.AtlasData.FontSize), float32(a.AtlasData.FontSize), uvsRect, color)
 			penX += float32(glyph.AdvanceX)
 
 		}
