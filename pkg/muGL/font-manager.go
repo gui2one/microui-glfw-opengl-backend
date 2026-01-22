@@ -171,12 +171,12 @@ func rasterizeGlyph(font *sfnt.Font, idx sfnt.GlyphIndex, fontSize int) (*image.
 	// We subtract minX/minY to move the glyph's top-left to (0,0).
 	// Adding a small padding (like 2) is fine, but be careful not to exceed fontSize.
 	offsetX := -minX
-	offsetY := baselineY - descent - 1
+	offsetY := baselineY - descent - 2
 
 	for _, seg := range segs {
 		f := func(v fixed.Point26_6) (float32, float32) {
 			x := offsetX + float32(v.X)/64.0
-			y := offsetY + float32(v.Y)/64.0 // Y axis goes DOWN in image space
+			y := offsetY + float32(v.Y)/64.0
 			return x, y
 		}
 
@@ -200,8 +200,7 @@ func rasterizeGlyph(font *sfnt.Font, idx sfnt.GlyphIndex, fontSize int) (*image.
 	}
 
 	glypMetrics := getGlyphMetrics(font, idx, segs, fontSize)
-	vOffset := int(glypMetrics.BearingY)
-	fmt.Println(vOffset)
+
 	img := image.NewRGBA(image.Rect(0, 0, fontSize, fontSize))
 	r.Draw(img, img.Bounds(), image.White, image.Point{})
 
@@ -216,7 +215,7 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int, fontSize int) *Atlas
 		return nil
 	}
 	font, _ := sfnt.Parse(fontFile)
-
+	fontMetrics := getFontMetrics(font, fontSize)
 	images := []*image.RGBA{}
 	glyphs_metrics := []*GlyphMetrics{}
 	if glyphsRange[0] > glyphsRange[1] {
@@ -371,7 +370,7 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int, fontSize int) *Atlas
 		)
 		draw.Draw(finalIMG, dstRect, img, image.Point{}, draw.Src)
 		glyphs_metrics[i].X = startX
-		glyphs_metrics[i].Y = startY
+		glyphs_metrics[i].Y = startY + fontMetrics.Descent
 
 		// prepare newt step
 		startX += step
@@ -385,8 +384,6 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int, fontSize int) *Atlas
 	f, _ := os.Create("out.png")
 	defer f.Close()
 	png.Encode(f, finalIMG)
-
-	fontMetrics := getFontMetrics(font, fontSize)
 
 	result.FontSize = fontSize
 	result.FontName = path.Base(fontFilePath)
