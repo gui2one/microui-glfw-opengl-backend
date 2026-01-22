@@ -114,11 +114,8 @@ func (a *App) PushRect(x, y, w, h float32, uvs Rect, color [3]float32) {
 }
 func (a *App) PushText(x, y float32, text string, color [3]float32) {
 	penX := x
-	penY := y + float32(a.AtlasData.FontMetrics.LineHeight)/2.0
+	penY := y
 
-	// fontSize := a.AtlasData.FontSize
-	// descAsc := a.AtlasData.FontMetrics.Descent / (a.AtlasData.FontMetrics.Ascent + a.AtlasData.FontMetrics.Descent)
-	// cellSize := float32(fontSize) / float32(a.AtlasData.Width)
 	glyphsRange := a.AtlasData.GlyphsRange
 	for _, c := range text {
 		if c == '\n' {
