@@ -203,6 +203,32 @@ func rasterizeGlyph(font *sfnt.Font, idx sfnt.GlyphIndex, fontSize int) (*image.
 	return img, glypMetrics
 }
 
+func addIconToAtlas(iconPath string, finalImage *image.RGBA, fontSize int, cellStepX float32, cellStepY float32, col int, row int) Rect {
+	closeImage, err := LoadIcon(iconPath)
+	if err != nil {
+		log.Println(err)
+		return Rect{}
+	}
+	iconRGBA := GetResizedIcon(closeImage, fontSize, fontSize)
+	draw.Draw(finalImage, image.Rect(fontSize*col, 0, fontSize*(col+1), fontSize),
+		iconRGBA,
+		image.Point{},
+		draw.Src,
+	)
+
+	result := Rect{
+		P1: Point{
+			X: cellStepX * float32(col),
+			Y: float32(row + 1),
+		},
+		P2: Point{
+			X: cellStepX * float32(col+1),
+			Y: (float32(row+1) - cellStepY),
+		},
+	}
+
+	return result
+}
 func GenerateAtlas(fontFilePath string, glyphsRange [2]int, fontSize int) *AtlasData {
 
 	fontFile, err := os.ReadFile(fontFilePath)
@@ -244,13 +270,10 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int, fontSize int) *Atlas
 	startX := bufferNum % numCols * stepX
 	startY := bufferNum / numCols * stepY
 
-	// draw black cell into Atlas
-	draw.Draw(finalIMG, image.Rect(0, 0, stepX, stepY), image.Black, image.Point{}, draw.Src)
-	// draw white cell into Atlas
-	draw.Draw(finalIMG, image.Rect(stepX*1, 0, stepX*2, stepY), image.White, image.Point{}, draw.Src)
-
 	cellStepX := float32(fontSize) / float32(finalWidth)
 	cellStepY := float32(fontSize) / float32(finalHeight)
+	// draw black cell into Atlas
+	draw.Draw(finalIMG, image.Rect(0, 0, stepX, stepY), image.Black, image.Point{}, draw.Src)
 	result.Black = Rect{
 		P1: Point{
 			X: 0 + 0.02,
@@ -261,6 +284,8 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int, fontSize int) *Atlas
 			Y: 0.98, /* should be 1 but border issue with shading */
 		},
 	}
+	// draw white cell into Atlas
+	draw.Draw(finalIMG, image.Rect(stepX*1, 0, stepX*2, stepY), image.White, image.Point{}, draw.Src)
 	result.White = Rect{
 		P1: Point{
 			X: cellStepX + 0.02,
@@ -271,95 +296,12 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int, fontSize int) *Atlas
 			Y: 0.98, /* should be 1 but border issue with shading */
 		},
 	}
-	result.CloseIcon = Rect{
-		P1: Point{
-			X: cellStepX * 2,
-			Y: (1 - cellStepY), /* +0.01 = border issue with shading */
-		},
-		P2: Point{
-			X: cellStepX * 3.0,
-			Y: 1.0, /* should be 1 but border issue with shading */
-		},
-	}
-	result.CheckedIcon = Rect{
-		P1: Point{
-			X: cellStepX * 3,
-			Y: 1.0, /* +0.01 = border issue with shading */
-		},
-		P2: Point{
-			X: cellStepX * 4,
-			Y: (1 - cellStepY), /* should be 1 but border issue with shading */
-		},
-	}
-	result.CollapsedIcon = Rect{
-		P1: Point{
-			X: cellStepX * 4,
-			Y: 1.0, /* +0.01 = border issue with shading */
-		},
-		P2: Point{
-			X: cellStepX * 5,
-			Y: (1 - cellStepY), /* should be 1 but border issue with shading */
-		},
-	}
-	result.ExpandedIcon = Rect{
-		P1: Point{
-			X: cellStepX * 5,
-			Y: 1.0, /* +0.01 = border issue with shading */
-		},
-		P2: Point{
-			X: cellStepX * 6,
-			Y: (1 - cellStepY), /* should be 1 but border issue with shading */
-		},
-	}
 
-	// add icons to atlas
-	closeImage, err := LoadIcon("assets/icons/close.png")
-	if err != nil {
-		log.Println(err)
-		return nil
-	}
-	iconRGBA := GetResizedIcon(closeImage, fontSize, fontSize)
-	draw.Draw(finalIMG, image.Rect(fontSize*2, 0, fontSize*3, fontSize),
-		iconRGBA,
-		image.Point{},
-		draw.Src,
-	)
+	result.CloseIcon = addIconToAtlas("assets/icons/close.png", finalIMG, fontSize, cellStepX, cellStepY, 2, 0)
+	result.CheckedIcon = addIconToAtlas("assets/icons/checked.png", finalIMG, fontSize, cellStepX, cellStepY, 3, 0)
+	result.CollapsedIcon = addIconToAtlas("assets/icons/collapsed.png", finalIMG, fontSize, cellStepX, cellStepY, 4, 0)
+	result.ExpandedIcon = addIconToAtlas("assets/icons/expanded.png", finalIMG, fontSize, cellStepX, cellStepY, 5, 0)
 
-	checkedImage, err := LoadIcon("assets/icons/checked.png")
-	if err != nil {
-		log.Println(err)
-		return nil
-	}
-	iconRGBA = GetResizedIcon(checkedImage, fontSize, fontSize)
-	draw.Draw(finalIMG, image.Rect(fontSize*3, 0, fontSize*4, fontSize),
-		iconRGBA,
-		image.Point{},
-		draw.Src,
-	)
-
-	collapsedImage, err := LoadIcon("assets/icons/collapsed.png")
-	if err != nil {
-		log.Println(err)
-		return nil
-	}
-	iconRGBA = GetResizedIcon(collapsedImage, fontSize, fontSize)
-	draw.Draw(finalIMG, image.Rect(fontSize*4, 0, fontSize*5, fontSize),
-		iconRGBA,
-		image.Point{},
-		draw.Src,
-	)
-
-	expandedImage, err := LoadIcon("assets/icons/expanded.png")
-	if err != nil {
-		log.Println(err)
-		return nil
-	}
-	iconRGBA = GetResizedIcon(expandedImage, fontSize, fontSize)
-	draw.Draw(finalIMG, image.Rect(fontSize*5, 0, fontSize*6, fontSize),
-		iconRGBA,
-		image.Point{},
-		draw.Src,
-	)
 	for i, img := range images {
 		dstRect := image.Rect(
 			int(startX),
