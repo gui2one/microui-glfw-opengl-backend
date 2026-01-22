@@ -114,7 +114,7 @@ func (a *App) PushRect(x, y, w, h float32, uvs Rect, color [3]float32) {
 }
 func (a *App) PushText(x, y float32, text string, color [3]float32) {
 	penX := x
-	penY := y
+	penY := y + float32(a.AtlasData.FontMetrics.LineHeight)/2.0
 
 	// fontSize := a.AtlasData.FontSize
 	// descAsc := a.AtlasData.FontMetrics.Descent / (a.AtlasData.FontMetrics.Ascent + a.AtlasData.FontMetrics.Descent)
@@ -210,10 +210,10 @@ func (app *App) Render(ctx *microui.Context) {
 	gl.Disable(gl.SCISSOR_TEST) // Start with no scissor
 	for _, cmd := range ctx.CommandList {
 		switch cmd.Type {
-		case microui.MU_COMMAND_CLIP:
-			DrawMyStuff(app)
-			app.ClearRects()
-			app.SetScissor(cmd.Clip.Rect)
+		// case microui.MU_COMMAND_CLIP:
+		// 	DrawMyStuff(app)
+		// 	app.ClearRects()
+		// 	app.SetScissor(cmd.Clip.Rect)
 
 		case microui.MU_COMMAND_RECT:
 
