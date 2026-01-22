@@ -116,7 +116,7 @@ func (a *App) PushText(x, y float32, text string, color [3]float32) {
 	penX := x
 	penY := y
 
-	fontSize := a.AtlasData.FontSize
+	// fontSize := a.AtlasData.FontSize
 	glyphsRange := a.AtlasData.GlyphsRange
 	for _, c := range text {
 		if c == '\n' {
@@ -135,14 +135,7 @@ func (a *App) PushText(x, y float32, text string, color [3]float32) {
 				P2: Point{X: uvStartX + uvW, Y: 1.0 - uvStartY - uvH},
 			}
 
-			charYOffset := fontSize - glyph.Height
-			// fmt.Println(uvsRect)
-			// fm := a.AtlasData.FontMetrics
-			// 1. Move from the top of the box to the baseline
-
-			// 2. Adjust for the specific glyph's offset from that baseline
-			// BearingY is how far ABOVE the baseline the character starts.
-			drawY := penY + float32(charYOffset)
+			drawY := penY
 			a.PushRect(penX+float32(glyph.BearingX), drawY, float32(glyph.Width), float32(glyph.Height), uvsRect, color)
 			penX += float32(glyph.AdvanceX)
 

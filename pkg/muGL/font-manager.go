@@ -123,13 +123,13 @@ func getGlyphMetrics(font *sfnt.Font, glyphIndex sfnt.GlyphIndex, segs sfnt.Segm
 
 	bounds := segs.Bounds()
 
-	bearingX := bounds.Min.X.Floor()
-	bearingY := bounds.Max.Y.Floor()
+	bearingX := bounds.Min.X.Ceil()
+	bearingY := bounds.Max.Y.Ceil()
 
-	minX := segs.Bounds().Min.X.Floor()
-	maxX := segs.Bounds().Max.X.Ceil() + 1
+	minX := segs.Bounds().Min.X.Ceil()
+	maxX := segs.Bounds().Max.X.Ceil()
 
-	minY := segs.Bounds().Min.Y.Floor()
+	minY := segs.Bounds().Min.Y.Ceil()
 	maxY := segs.Bounds().Max.Y.Ceil()
 
 	glyphHeight := maxY - minY
@@ -146,14 +146,24 @@ func getGlyphMetrics(font *sfnt.Font, glyphIndex sfnt.GlyphIndex, segs sfnt.Segm
 }
 
 func rasterizeGlyph(font *sfnt.Font, idx sfnt.GlyphIndex, fontSize int) (*image.RGBA, *GlyphMetrics) {
+
 	buf := new(sfnt.Buffer)
 	// Load glyph scaled to fontSize (this returns units in 26.6 fixed point)
 	segs, _ := font.LoadGlyph(buf, idx, fixed.Int26_6(fontSize<<6), nil)
+	metrics, err := font.Metrics(buf, fixed.Int26_6(fontSize<<6), 0)
+	if err != nil {
+		panic(err)
+	}
 
+	ascent := float32(metrics.Ascent) / 64.0
+	descent := float32(metrics.Descent) / 64.0
+
+	baselineY := ascent
 	// Calculate bounds in pixels (divide by 64)
 	b := segs.Bounds()
 	minX := float32(b.Min.X) / 64.0
-	minY := float32(b.Min.Y) / 64.0
+	// minY := float32(b.Min.Y) / 64.0
+	// maxY := float32(b.Max.Y) / 64.0
 
 	r := vector.NewRasterizer(fontSize, fontSize)
 
@@ -161,12 +171,13 @@ func rasterizeGlyph(font *sfnt.Font, idx sfnt.GlyphIndex, fontSize int) (*image.
 	// We subtract minX/minY to move the glyph's top-left to (0,0).
 	// Adding a small padding (like 2) is fine, but be careful not to exceed fontSize.
 	offsetX := -minX
-	offsetY := -minY
+	offsetY := baselineY - descent - 1
 
 	for _, seg := range segs {
-		// Helper to convert 26.6 Fixed to Float pixels
 		f := func(v fixed.Point26_6) (float32, float32) {
-			return offsetX + (float32(v.X) / 64.0), offsetY + (float32(v.Y) / 64.0)
+			x := offsetX + float32(v.X)/64.0
+			y := offsetY + float32(v.Y)/64.0 // Y axis goes DOWN in image space
+			return x, y
 		}
 
 		switch seg.Op {
@@ -188,10 +199,12 @@ func rasterizeGlyph(font *sfnt.Font, idx sfnt.GlyphIndex, fontSize int) (*image.
 		}
 	}
 
+	glypMetrics := getGlyphMetrics(font, idx, segs, fontSize)
+	vOffset := int(glypMetrics.BearingY)
+	fmt.Println(vOffset)
 	img := image.NewRGBA(image.Rect(0, 0, fontSize, fontSize))
 	r.Draw(img, img.Bounds(), image.White, image.Point{})
 
-	glypMetrics := getGlyphMetrics(font, idx, segs, fontSize)
 	return img, glypMetrics
 }
 
