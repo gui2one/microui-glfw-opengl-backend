@@ -322,7 +322,7 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int, fontSize int) *Atlas
 }
 
 func addIconToAtlas(iconPath string, finalImage *image.RGBA, fontSize int, cellStepX float32, cellStepY float32, col int, row int) Rect {
-	closeImage, err := LoadIcon(iconPath)
+	closeImage, err := LoadStaticIcon(iconPath)
 	if err != nil {
 		log.Println(err)
 		return Rect{}

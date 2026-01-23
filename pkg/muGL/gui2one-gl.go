@@ -70,12 +70,9 @@ func (a *App) InitGL(w int, h int) {
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
-	// Texture ATLAS
-	// atlasData := AG.GenerateAtlas("assets/fonts/ConsolaMono-Bold.TTF", GLYPHS_RANGE, 14)
 	atlasData := AG.GenerateAtlas("assets/fonts/CONSOLAB___.TTF", GLYPHS_RANGE, 14)
 	a.AtlasData = *atlasData
 	a.AtlasTexture = *FromImage(atlasData.Atlas)
-	// atlasData.Print(true)
 
 	a.AtlasTexture.Bind()
 
@@ -353,7 +350,8 @@ func DrawMyStuff(app *App) {
 func loadShaderSource(filename string) (string, error) {
 	data, err := os.ReadFile(filename)
 	if err != nil {
-		fmt.Println(err)
+		// fmt.Println(err)
+		data, err = STATIC_SHADERS.ReadFile(filename)
 	}
 
 	source := string(data)

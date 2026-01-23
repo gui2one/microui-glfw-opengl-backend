@@ -3,13 +3,12 @@ package atlas_gen
 import (
 	"image"
 	"image/png"
-	"os"
 
 	xdraw "golang.org/x/image/draw"
 )
 
-func LoadIcon(path string) (image.Image, error) {
-	file, err := os.Open(path)
+func LoadStaticIcon(path string) (image.Image, error) {
+	file, err := STATIC_ICONS.Open(path)
 	if err != nil {
 		return nil, err
 
