@@ -107,10 +107,10 @@ func handleGLFWScroll(_ *glfw.Window, x, y float64) {
 }
 
 func MainWindow() {
+	muGL.SliderWithLabel(MuCtx, "Slider", &Val1, 0.0, 10.0)
+
 	MuCtx.LayoutRow(1, []int{-1}, 0)
-	MuCtx.Label("This is a label")
-	MuCtx.Slider(&Val1, 0.0, 10.0)
-	MuCtx.Text("Ici ... du texte")
+	MuCtx.Text("Ici ... du texte Ici ... du texte Ici ... du texte Ici ... du texte Ici ... du texte")
 	MuCtx.TextBox(&Text1)
 	MuCtx.Checkbox("Bool Value", &Bool1)
 
