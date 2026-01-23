@@ -162,6 +162,8 @@ func rasterizeGlyph(font *sfnt.Font, idx sfnt.GlyphIndex, fontSize int) (*image.
 	if err != nil {
 		panic(err)
 	}
+
+	glypMetrics := getGlyphMetrics(font, idx, segs, fontSize)
 	// 1. Get the metrics in floating point
 	fAscent := float32(metrics.Ascent.Ceil())
 	fDescent := float32(metrics.Descent.Ceil()) // Distance below baseline
@@ -201,8 +203,6 @@ func rasterizeGlyph(font *sfnt.Font, idx sfnt.GlyphIndex, fontSize int) (*image.
 			r.CubeTo(x1, y1, x2, y2, x3, y3)
 		}
 	}
-
-	glypMetrics := getGlyphMetrics(font, idx, segs, fontSize)
 
 	img := image.NewRGBA(image.Rect(0, 0, canvasWidth, canvasHeight))
 	r.Draw(img, img.Bounds(), image.White, image.Point{})

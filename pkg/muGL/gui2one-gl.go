@@ -123,6 +123,7 @@ func (a *App) PushText(x, y float32, text string, color [3]float32) {
 		if c == '\n' {
 			penX = x
 			penY += float32(a.AtlasData.FontMetrics.LineHeight)
+			continue
 		}
 		if c == ' ' {
 			penX += float32(a.AtlasData.FontSize / 2)
@@ -141,8 +142,9 @@ func (a *App) PushText(x, y float32, text string, color [3]float32) {
 			}
 
 			drawY := penY
-			a.PushRect(penX+float32(glyph.BearingX), drawY, float32(a.AtlasData.FontSize), float32(a.AtlasData.FontSize), uvsRect, color)
+			a.PushRect(penX, drawY, float32(a.AtlasData.FontSize), float32(a.AtlasData.FontSize), uvsRect, color)
 			penX += float32(glyph.AdvanceX)
+			continue
 
 		}
 	}

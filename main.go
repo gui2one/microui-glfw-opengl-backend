@@ -196,7 +196,7 @@ func main() {
 		MuCtx.Begin()
 
 		for i, w := range Windows {
-			if MuCtx.BeginWindow(w.Name, mu.NewRect((i+1)*50, (i+1)*50, 200, 300)) {
+			if MuCtx.BeginWindow(w.Name, mu.NewRect((i+1)*150, (i+1)*150, 300, 650)) {
 				container := MuCtx.GetCurrentContainer()
 
 				if MuCtx.MousePressed == microui.MU_MOUSE_LEFT && MuCtx.HoverRoot == container {
