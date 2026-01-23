@@ -2,6 +2,7 @@ package muGL
 
 import (
 	"fmt"
+	AG "font-stuff/pkg/atlas_gen"
 
 	"log"
 	"os"
@@ -27,7 +28,7 @@ func InitGL() {
 type App struct {
 	MeshBuffer         *GlMeshData
 	MainShader         uint32
-	AtlasData          AtlasData
+	AtlasData          AG.AtlasData
 	AtlasTexture       Texture
 	NumFloatsPerVertex int
 	SizeOfFloat32      int
@@ -67,7 +68,8 @@ func (a *App) InitGL() {
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
 	// Texture ATLAS
-	atlasData := GenerateAtlas("assets/fonts/ConsolaMono-Bold.TTF", GLYPHS_RANGE, 14)
+	// atlasData := AG.GenerateAtlas("assets/fonts/ConsolaMono-Bold.TTF", GLYPHS_RANGE, 14)
+	atlasData := AG.GenerateAtlas("assets/fonts/CONSOLAB.TTF", GLYPHS_RANGE, 14)
 	a.AtlasData = *atlasData
 	a.AtlasTexture = *FromImage(atlasData.Atlas)
 	// atlasData.Print(true)
@@ -90,13 +92,13 @@ func (a *App) TextWidth(font microui.Font, text string) int {
 func (a *App) TextHeight(font microui.Font) int {
 	return a.AtlasData.FontMetrics.LineHeight
 }
-func (a *App) PushRect(x, y, w, h float32, uvs Rect, color [3]float32) {
+func (a *App) PushRect(x, y, w, h float32, uvs AG.Rect, color [3]float32) {
 	m := a.MeshBuffer
 
 	numVertices := len(m.Vertices) / a.NumFloatsPerVertex
-	rect := Rect{
-		P1: Point{X: x, Y: y},
-		P2: Point{X: x + w, Y: y + h},
+	rect := AG.Rect{
+		P1: AG.Point{X: x, Y: y},
+		P2: AG.Point{X: x + w, Y: y + h},
 	}
 	vertices := []float32{
 		/*pos */ rect.P1.X, rect.P1.Y /*uvs */, uvs.P1.X, uvs.P1.Y /* color */, color[0], color[1], color[2],
@@ -133,9 +135,9 @@ func (a *App) PushText(x, y float32, text string, color [3]float32) {
 			uvStartY := float32(glyph.Y) / float32(a.AtlasData.Height)
 			uvW := float32(a.AtlasData.FontSize) / float32(a.AtlasData.Width)
 			uvH := float32(a.AtlasData.FontSize) / float32(a.AtlasData.Height)
-			uvsRect := Rect{
-				P1: Point{X: uvStartX, Y: 1.0 - uvStartY},
-				P2: Point{X: uvStartX + uvW, Y: 1.0 - uvStartY - uvH},
+			uvsRect := AG.Rect{
+				P1: AG.Point{X: uvStartX, Y: 1.0 - uvStartY},
+				P2: AG.Point{X: uvStartX + uvW, Y: 1.0 - uvStartY - uvH},
 			}
 
 			drawY := penY

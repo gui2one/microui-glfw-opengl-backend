@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	AG "font-stuff/pkg/atlas_gen"
 	muGL "font-stuff/pkg/muGL"
 	"path"
 
@@ -32,7 +33,7 @@ func handleGLFWDrop(wnd *glfw.Window, paths []string) {
 	fmt.Println(myApp.AtlasTexture.Width)
 	first := paths[0]
 	if path.Ext(first) == ".ttf" || path.Ext(first) == ".TTF" {
-		atlas := muGL.GenerateAtlas(first, muGL.GLYPHS_RANGE, 18)
+		atlas := AG.GenerateAtlas(first, muGL.GLYPHS_RANGE, 18)
 		gl.DeleteTextures(1, &myApp.AtlasTexture.ID)
 		myApp.AtlasTexture = *muGL.FromImage(atlas.Atlas)
 	}
@@ -208,7 +209,7 @@ func main() {
 
 		MuCtx.End()
 
-		gl.ClearColor(1.0, 0.0, 0.0, 1.0)
+		gl.ClearColor(0.5, 0.1, 0.2, 1.0)
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 		myApp.Render(MuCtx)
 

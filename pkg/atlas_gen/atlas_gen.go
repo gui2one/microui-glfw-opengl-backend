@@ -1,4 +1,4 @@
-package muGL
+package atlas_gen
 
 import (
 	"fmt"
@@ -16,6 +16,12 @@ import (
 	"golang.org/x/image/vector"
 )
 
+type Point struct {
+	X, Y float32
+}
+type Rect struct {
+	P1, P2 Point
+}
 type GlyphMetrics struct {
 	IDX       sfnt.GlyphIndex
 	UnicodeID uint16
@@ -141,7 +147,7 @@ func getGlyphMetrics(font *sfnt.Font, glyphIndex sfnt.GlyphIndex, segs sfnt.Segm
 		IDX:      glyphIndex,
 		AdvanceX: adv.Floor(),
 		BearingX: minX,
-		BearingY: maxY, // Usually the offset from baseline to top
+		BearingY: maxY,
 		Width:    maxX - minX,
 		Height:   maxY - minY,
 	}
@@ -151,20 +157,21 @@ func rasterizeGlyph(font *sfnt.Font, idx sfnt.GlyphIndex, fontSize int) (*image.
 
 	buf := new(sfnt.Buffer)
 	// Load glyph scaled to fontSize (this returns units in 26.6 fixed point)
-	segs, _ := font.LoadGlyph(buf, idx, fixed.Int26_6(fontSize<<6), nil)
-	metrics, err := font.Metrics(buf, fixed.Int26_6(fontSize<<6), 0)
+	segs, _ := font.LoadGlyph(buf, idx, fixed.I(fontSize), nil)
+	metrics, err := font.Metrics(buf, fixed.I(fontSize), 0)
 	if err != nil {
 		panic(err)
 	}
 	// 1. Get the metrics in floating point
-	fAscent := float32(metrics.Ascent) / 64.0
-	fDescent := float32(metrics.Descent) / 64.0 // Distance below baseline
+	fAscent := float32(metrics.Ascent.Ceil())
+	fDescent := float32(metrics.Descent.Ceil()) // Distance below baseline
 
 	// 2. The height of the font 'line' is actually:
 	totalLineHeight := fAscent + fDescent
 
 	offsetX := float32(0.0)
-	offsetY := fAscent - fDescent
+	offsetY := fAscent
+	// offsetY := float32(0.0)
 	canvasWidth := fontSize
 	canvasHeight := int(math.Ceil(float64(totalLineHeight))) + 1
 	r := vector.NewRasterizer(canvasWidth, canvasHeight)
@@ -197,38 +204,12 @@ func rasterizeGlyph(font *sfnt.Font, idx sfnt.GlyphIndex, fontSize int) (*image.
 
 	glypMetrics := getGlyphMetrics(font, idx, segs, fontSize)
 
-	img := image.NewRGBA(image.Rect(0, 0, fontSize, int(totalLineHeight)))
+	img := image.NewRGBA(image.Rect(0, 0, canvasWidth, canvasHeight))
 	r.Draw(img, img.Bounds(), image.White, image.Point{})
 
 	return img, glypMetrics
 }
 
-func addIconToAtlas(iconPath string, finalImage *image.RGBA, fontSize int, cellStepX float32, cellStepY float32, col int, row int) Rect {
-	closeImage, err := LoadIcon(iconPath)
-	if err != nil {
-		log.Println(err)
-		return Rect{}
-	}
-	iconRGBA := GetResizedIcon(closeImage, fontSize, fontSize)
-	draw.Draw(finalImage, image.Rect(fontSize*col, 0, fontSize*(col+1), fontSize),
-		iconRGBA,
-		image.Point{},
-		draw.Src,
-	)
-
-	result := Rect{
-		P1: Point{
-			X: cellStepX * float32(col),
-			Y: float32(row + 1),
-		},
-		P2: Point{
-			X: cellStepX * float32(col+1),
-			Y: (float32(row+1) - cellStepY),
-		},
-	}
-
-	return result
-}
 func GenerateAtlas(fontFilePath string, glyphsRange [2]int, fontSize int) *AtlasData {
 
 	fontFile, err := os.ReadFile(fontFilePath)
@@ -237,6 +218,8 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int, fontSize int) *Atlas
 		return nil
 	}
 	font, _ := sfnt.Parse(fontFile)
+	getMaxBounds(font, fontSize, glyphsRange)
+
 	fontMetrics := getFontMetrics(font, fontSize)
 	images := []*image.RGBA{}
 	glyphs_metrics := []*GlyphMetrics{}
@@ -261,7 +244,7 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int, fontSize int) *Atlas
 	bufferNum := 30 /* number of empty spaces for White, icons and stuff */
 	numCols := int(math.Ceil(math.Sqrt(float64(len(images) + bufferNum))))
 	stepX := int(fontSize)
-	stepY := int(fontMetrics.Ascent + fontMetrics.Descent)
+	stepY := int(fontMetrics.Ascent+fontMetrics.Descent) + 1
 	finalWidth := numCols * stepX
 	finalHeight := numCols * stepY
 	finalIMG := image.NewRGBA(image.Rect(0, 0, int(finalWidth), int(finalHeight)))
@@ -302,6 +285,9 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int, fontSize int) *Atlas
 	result.CollapsedIcon = addIconToAtlas("assets/icons/collapsed.png", finalIMG, fontSize, cellStepX, cellStepY, 4, 0)
 	result.ExpandedIcon = addIconToAtlas("assets/icons/expanded.png", finalIMG, fontSize, cellStepX, cellStepY, 5, 0)
 
+	// for i, img := range images {
+	// 	SaveRGBAToPNG(img, fmt.Sprintf("%v/%v", "aaa", i))
+	// }
 	for i, img := range images {
 		dstRect := image.Rect(
 			int(startX),
@@ -321,11 +307,6 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int, fontSize int) *Atlas
 		}
 	}
 
-	// write file on disk ... for now
-	f, _ := os.Create("out.png")
-	defer f.Close()
-	png.Encode(f, finalIMG)
-
 	result.FontSize = fontSize
 	result.FontName = path.Base(fontFilePath)
 	result.Width = finalWidth
@@ -337,4 +318,83 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int, fontSize int) *Atlas
 
 	return result
 
+}
+
+func addIconToAtlas(iconPath string, finalImage *image.RGBA, fontSize int, cellStepX float32, cellStepY float32, col int, row int) Rect {
+	closeImage, err := LoadIcon(iconPath)
+	if err != nil {
+		log.Println(err)
+		return Rect{}
+	}
+	iconRGBA := GetResizedIcon(closeImage, fontSize, fontSize)
+	draw.Draw(finalImage, image.Rect(fontSize*col, 0, fontSize*(col+1), fontSize),
+		iconRGBA,
+		image.Point{},
+		draw.Src,
+	)
+
+	result := Rect{
+		P1: Point{
+			X: cellStepX * float32(col),
+			Y: float32(row + 1),
+		},
+		P2: Point{
+			X: cellStepX * float32(col+1),
+			Y: (float32(row+1) - cellStepY),
+		},
+	}
+
+	return result
+}
+func getMaxBounds(font *sfnt.Font, fontSize int, glypRange [2]int) (int, int) {
+	buf := new(sfnt.Buffer)
+	maxW := 0
+	maxH := 0
+	for i := glypRange[0]; i <= glypRange[1]; i++ {
+		glyphIndex, err := font.GlyphIndex(buf, rune(i))
+		if err != nil || glyphIndex == 0 {
+			continue
+		}
+		segs, _ := font.LoadGlyph(buf, glyphIndex, fixed.Int26_6(fontSize<<6), nil)
+		metrics := getGlyphMetrics(font, glyphIndex, segs, fontSize)
+		if metrics.Width > maxW {
+			maxW = metrics.Width
+		}
+		if metrics.Height > maxH {
+			maxH = metrics.Height
+		}
+	}
+	fm, err := font.Metrics(buf, fixed.I(fontSize), 0)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// fmt.Println("Ascent , Descent  : ", fm.Ascent.Ceil(), fm.Descent.Ceil())
+	maxH = int(fm.Ascent.Ceil() + fm.Descent.Ceil())
+	// fmt.Println(maxW, maxH)
+	return maxW, maxH
+}
+func SaveAtlasToPNG(atlas *AtlasData) {
+	fileName := atlas.FontName
+	SaveRGBAToPNG(atlas.Atlas, fileName, true)
+}
+
+func SaveRGBAToPNG(img *image.RGBA, fileName string, createMissingDirs bool) {
+	fileName = "pngs/" + fileName + ".png"
+	dirPath := path.Dir(fileName)
+	if createMissingDirs {
+		err := os.MkdirAll(dirPath, os.ModePerm)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	}
+	f, err := os.Create(fileName)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer f.Close()
+	png.Encode(f, img)
+	fmt.Println("RGBA saved to", fileName)
 }
