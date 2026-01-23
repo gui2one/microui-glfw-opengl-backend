@@ -38,7 +38,9 @@ type App struct {
 	Height int
 }
 
-func (a *App) InitGL() {
+func (a *App) InitGL(w int, h int) {
+	a.Width = w
+	a.Height = h
 	a.NumFloatsPerVertex = 2 + 2 + 3
 	a.SizeOfFloat32 = 4
 

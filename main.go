@@ -148,12 +148,10 @@ func main() {
 	MuCtx = microui.NewContext()
 
 	muGL.InitGL()
-	myApp.InitGL()
+	myApp.InitGL(Width, Height)
 
 	myApp.InitMuContext(MuCtx)
 
-	myApp.Width = Width
-	myApp.Height = Height
 	gl.Viewport(0, 0, int32(myApp.Width), int32(myApp.Height))
 	glfw.SwapInterval(0)
 
