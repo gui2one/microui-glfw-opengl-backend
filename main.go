@@ -60,7 +60,6 @@ func handleKeyDown(key int) {
 }
 func handleGLFWKey(wnd *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
 	muEvents.SetKeyCallback(MuCtx, key, scancode, action, mods)
-
 }
 func handleGLFWChar(wnd *glfw.Window, char rune) {
 	muEvents.SetCharCallBack(MuCtx, char)
@@ -95,6 +94,7 @@ func OptionsWindow() {
 
 }
 
+// app window utils
 func moveToFront(name string, windows []AppWindow) []AppWindow {
 	for i, w := range windows {
 		if w.Name == name {
