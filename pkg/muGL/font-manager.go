@@ -139,7 +139,7 @@ func getGlyphMetrics(font *sfnt.Font, glyphIndex sfnt.GlyphIndex, segs sfnt.Segm
 
 	return &GlyphMetrics{
 		IDX:      glyphIndex,
-		AdvanceX: adv.Ceil(),
+		AdvanceX: adv.Floor(),
 		BearingX: minX,
 		BearingY: maxY, // Usually the offset from baseline to top
 		Width:    maxX - minX,

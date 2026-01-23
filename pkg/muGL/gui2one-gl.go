@@ -123,7 +123,7 @@ func (a *App) PushText(x, y float32, text string, color [3]float32) {
 			penY += float32(a.AtlasData.FontMetrics.LineHeight)
 		}
 		if c == ' ' {
-			penX += float32(a.AtlasData.FontSize / 3)
+			penX += float32(a.AtlasData.FontSize / 2)
 			continue
 		}
 		if c >= rune(glyphsRange[0]) && c <= rune(glyphsRange[1]) {
