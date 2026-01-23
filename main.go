@@ -4,6 +4,7 @@ import (
 	"fmt"
 	AG "font-stuff/pkg/atlas_gen"
 	muGL "font-stuff/pkg/muGL"
+	muEvents "font-stuff/pkg/muGL/glfw"
 	"path"
 
 	"runtime"
@@ -44,7 +45,7 @@ func handleGLFWResize(wnd *glfw.Window, width, height int) {
 	gl.Viewport(0, 0, int32(myApp.Width), int32(myApp.Height))
 }
 func handleGLFWCursorPos(wnd *glfw.Window, x, y float64) {
-	MuCtx.InputMouseMove(int(x), int(y))
+	muEvents.SetCursorPosCallback(MuCtx, x, y)
 
 	action := wnd.GetMouseButton(glfw.MouseButton1)
 	if action == glfw.Press {
@@ -52,61 +53,24 @@ func handleGLFWCursorPos(wnd *glfw.Window, x, y float64) {
 	}
 }
 func handleGLFWMouseButton(wnd *glfw.Window, button glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
-
-	// Map GLFW buttons to MicroUI buttons
-	var muBtn int
-	switch button {
-	case glfw.MouseButtonLeft:
-		muBtn = microui.MU_MOUSE_LEFT
-	case glfw.MouseButtonRight:
-		muBtn = microui.MU_MOUSE_RIGHT
-	case glfw.MouseButtonMiddle:
-		muBtn = microui.MU_MOUSE_MIDDLE
-	default:
-		return
-	}
-	switch action {
-	case glfw.Release:
-		x, y := wnd.GetCursorPos()
-		MuCtx.InputMouseUp(int(x), int(y), muBtn)
-	case glfw.Press:
-		x, y := wnd.GetCursorPos()
-		MuCtx.InputMouseDown(int(x), int(y), muBtn)
-
-	}
-
+	muEvents.SetMouseButtonCallback(MuCtx, wnd, button, action, mods)
 }
 func handleKeyDown(key int) {
 	fmt.Println(key)
 }
 func handleGLFWKey(wnd *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
-	switch action {
-	case glfw.Press, glfw.Repeat:
-		switch key {
-		case glfw.KeyBackspace:
-			MuCtx.InputKeyDown(microui.MU_KEY_BACKSPACE)
-		case glfw.KeyEnter:
-			MuCtx.InputKeyDown(microui.MU_KEY_RETURN)
-			// Add other functional keys as needed
-		}
-	case glfw.Release:
-		switch key {
-		case glfw.KeyBackspace:
-			MuCtx.InputKeyUp(microui.MU_KEY_BACKSPACE)
-		case glfw.KeyEnter:
-			MuCtx.InputKeyUp(microui.MU_KEY_RETURN)
-		}
-	}
+	muEvents.SetKeyCallback(MuCtx, key, scancode, action, mods)
 
 }
 func handleGLFWChar(wnd *glfw.Window, char rune) {
-	MuCtx.InputText([]rune{char})
+	muEvents.SetCharCallBack(MuCtx, char)
 }
 func handleGLFWScroll(_ *glfw.Window, x, y float64) {
-	MuCtx.InputScroll(int(x*10), int(-y*10))
+	muEvents.SetScrollCallback(MuCtx, x, y)
 }
 
 func MainWindow() {
+
 	muGL.SliderWithLabel(MuCtx, "Slider", &Val1, 0.0, 10.0)
 
 	MuCtx.LayoutRow(1, []int{-1}, 0)
