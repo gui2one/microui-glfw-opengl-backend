@@ -70,7 +70,7 @@ func (a *App) InitGL() {
 
 	// Texture ATLAS
 	// atlasData := AG.GenerateAtlas("assets/fonts/ConsolaMono-Bold.TTF", GLYPHS_RANGE, 14)
-	atlasData := AG.GenerateAtlas("assets/fonts/CONSOLAB.TTF", GLYPHS_RANGE, 14)
+	atlasData := AG.GenerateAtlas("assets/fonts/CONSOLAB___.TTF", GLYPHS_RANGE, 14)
 	a.AtlasData = *atlasData
 	a.AtlasTexture = *FromImage(atlasData.Atlas)
 	// atlasData.Print(true)

@@ -215,7 +215,8 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int, fontSize int) *Atlas
 	fontFile, err := os.ReadFile(fontFilePath)
 	if err != nil {
 		log.Println(err)
-		return nil
+		fontFile = GetFont()
+		fmt.Printf("Faild to load %s,. Using Default font\n", fontFilePath)
 	}
 	font, _ := sfnt.Parse(fontFile)
 	getMaxBounds(font, fontSize, glyphsRange)
