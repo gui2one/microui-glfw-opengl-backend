@@ -2,7 +2,8 @@ package muGL
 
 import (
 	"fmt"
-	AG "font-stuff/pkg/atlas_gen"
+
+	AG "github.com/gui2one/microui-glfw-opengl-backend/pkg/atlas_gen"
 
 	"log"
 	"os"

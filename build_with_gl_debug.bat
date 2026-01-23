@@ -1,2 +1,2 @@
 @echo off
-go build -v -tags gldebug
+go build -v -tags gldebug -o demo.exe

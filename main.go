@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	AG "font-stuff/pkg/atlas_gen"
-	muGL "font-stuff/pkg/muGL"
-	muEvents "font-stuff/pkg/muGL/glfw"
 	"path"
+
+	AG "github.com/gui2one/microui-glfw-opengl-backend/pkg/atlas_gen"
+	muGL "github.com/gui2one/microui-glfw-opengl-backend/pkg/muGL"
+	muEvents "github.com/gui2one/microui-glfw-opengl-backend/pkg/muGL/glfw"
 
 	"runtime"
 

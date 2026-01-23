@@ -1,4 +1,4 @@
-module font-stuff
+module github.com/gui2one/microui-glfw-opengl-backend
 
 go 1.25.5
 
