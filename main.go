@@ -102,8 +102,8 @@ func handleGLFWKey(wnd *glfw.Window, key glfw.Key, scancode int, action glfw.Act
 func handleGLFWChar(wnd *glfw.Window, char rune) {
 	MuCtx.InputText([]rune{char})
 }
-func handleGLFWScroll(wnd *glfw.Window, x, y float64) {
-	MuCtx.InputScroll(int(x), int(y))
+func handleGLFWScroll(_ *glfw.Window, x, y float64) {
+	MuCtx.InputScroll(int(x*10), int(-y*10))
 }
 
 func MainWindow() {
@@ -119,13 +119,16 @@ func MainWindow() {
 		MuCtx.PushID([]byte("id1"))
 		MuCtx.TextBox(&Text1)
 		MuCtx.PopID()
-
 	}
 }
 func OptionsWindow() {
 	MuCtx.LayoutRow(1, []int{-1}, 0)
-	MuCtx.Slider(&Val1, 0.0, 10.0)
-	MuCtx.TextBox(&Text1)
+	for i := 0; i < 10; i++ {
+		MuCtx.PushID([]byte{byte(i)})
+		MuCtx.Slider(&Val1, 0.0, 10.0)
+		MuCtx.PopID()
+	}
+
 }
 
 func moveToFront(name string, windows []AppWindow) []AppWindow {
@@ -189,6 +192,7 @@ func main() {
 	gl.Viewport(0, 0, int32(myApp.Width), int32(myApp.Height))
 	glfw.SwapInterval(0)
 
+	fmt.Println("MicroUI GL Backend")
 	for !wnd.ShouldClose() {
 		windowToMove := ""
 		glfw.WaitEvents()
