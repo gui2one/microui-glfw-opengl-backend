@@ -17,7 +17,7 @@ import (
 
 var myApp muGL.App
 var Width = 1280
-var Height = 720
+var Height = 600
 var MuCtx *microui.Context
 var Val1 float32 = 5
 var Text1 string = "text variable"
