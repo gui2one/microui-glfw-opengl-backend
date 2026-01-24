@@ -1,1 +1,1 @@
-go build -ldflags "-H windowsgui" -o demo.exe
+go build -ldflags "-H windowsgui" -o demo.exe demo/main.go 

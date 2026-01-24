@@ -9,7 +9,7 @@
    id="svg1"
    inkscape:version="1.4 (86a8ad7, 2024-10-11)"
    sodipodi:docname="icons.svg"
-   inkscape:export-filename="..\icons\expanded.png"
+   inkscape:export-filename="..\..\pkg\atlas_gen\assets\icons\close.png"
    inkscape:export-xdpi="135.91887"
    inkscape:export-ydpi="135.91887"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
@@ -27,15 +27,15 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="px"
      inkscape:lockguides="true"
-     inkscape:zoom="15.139091"
-     inkscape:cx="30.649133"
-     inkscape:cy="32.069298"
+     inkscape:zoom="5.352477"
+     inkscape:cx="1.0275616"
+     inkscape:cy="40.074904"
      inkscape:window-width="1920"
      inkscape:window-height="1009"
      inkscape:window-x="-8"
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
-     inkscape:current-layer="layer3-8"
+     inkscape:current-layer="layer1"
      showgrid="true">
     <sodipodi:guide
        position="0,16.933333"
@@ -79,14 +79,14 @@
      inkscape:label="CLOSE ICON"
      inkscape:groupmode="layer"
      id="layer1"
-     style="display:none">
+     style="display:inline">
     <path
-       style="fill:none;stroke:#000000;stroke-width:2.11667;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
-       d="M 2.9485912,3.1890439 13.763095,13.931451"
+       style="fill:none;stroke:#ffffff;stroke-width:1.55755;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
+       d="M 4.3737549,4.6237299 12.331583,12.528506"
        id="path4" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:2.11667;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
-       d="M 13.835192,3.1409795 2.8524623,14.099677"
+       style="fill:none;stroke:#ffffff;stroke-width:1.55755;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
+       d="M 12.384636,4.5883618 4.3030187,12.652295"
        id="path5" />
   </g>
   <g
@@ -95,15 +95,17 @@
      inkscape:label="CHECKED ICON"
      style="display:none">
     <path
-       style="fill:none;stroke:#ffffff;stroke-width:2.11667;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
-       d="M 2.9601882,9.4335668 6.798674,14.18288 c 0,0 7.416735,-9.3359785 7.872149,-11.4503986"
-       id="path1" />
+       style="fill:none;stroke:#ffffff;stroke-width:1.59224;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       d="m 5.1029535,10.229843 c 0.8252531,1.498993 1.4952083,1.9109 2.1954123,2.534549 0,0 4.2939292,-4.4029959 5.9217392,-8.6134385"
+       id="path1"
+       sodipodi:nodetypes="ccc" />
   </g>
   <g
      inkscape:groupmode="layer"
      id="layer3"
      inkscape:label="COLLAPSED_ICON"
-     style="display:none;stroke:#ffffff;stroke-width:2.11667;stroke-dasharray:none;stroke-opacity:1">
+     style="display:none;stroke:#ffffff;stroke-width:2.11667;stroke-dasharray:none;stroke-opacity:1"
+     transform="matrix(0.71260104,0,0,0.71260104,2.3302272,2.437734)">
     <path
        style="fill:none;stroke:#ffffff;stroke-width:2.11667;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
        d="M 5.2210135,14.475624 11.141389,8.5552469 5.0746305,2.4884876"
@@ -114,10 +116,10 @@
      id="layer3-8"
      inkscape:label="EXPANDED_ICON"
      transform="translate(-0.31212893,1.7448473)"
-     style="display:inline">
+     style="display:none">
     <path
-       style="display:inline;fill:none;stroke:#ffffff;stroke-width:2.11667;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
-       d="M 2.5373036,4.4890771 8.4576807,10.409453 14.52444,4.3426941"
+       style="display:inline;fill:none;stroke:#ffffff;stroke-width:1.51341;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       d="M 4.2455072,5.3118825 8.4785406,9.5449151 12.816236,5.2072195"
        id="path2-8" />
   </g>
 </svg>
