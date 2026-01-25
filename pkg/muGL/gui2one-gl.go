@@ -216,7 +216,7 @@ func (app *App) Render(ctx *microui.Context) {
 	for _, cmd := range ctx.CommandList {
 		switch cmd.Type {
 		case microui.MU_COMMAND_CLIP:
-			DrawMyStuff(app)
+			FlushRects(app)
 			app.ClearRects()
 			app.SetScissor(cmd.Clip.Rect)
 
@@ -296,7 +296,7 @@ func (app *App) Render(ctx *microui.Context) {
 
 	}
 
-	DrawMyStuff(app)
+	FlushRects(app)
 }
 
 type GlMeshData struct {
@@ -341,8 +341,8 @@ func PrepareGLobalState(app *App) {
 	gl.UniformMatrix4fv(loc, 1, false, &proj[0])
 }
 
-// DrawMyStuff draws my stuff
-func DrawMyStuff(app *App) {
+// The actual opengl draw call
+func FlushRects(app *App) {
 	app.FlushRects()
 	gl.DrawElements(gl.TRIANGLES, int32(len(app.MeshBuffer.Indices)), gl.UNSIGNED_INT, nil)
 }
