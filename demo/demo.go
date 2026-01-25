@@ -137,7 +137,7 @@ func main() {
 	glfw.WindowHint(glfw.ContextVersionMajor, 4)
 	glfw.WindowHint(glfw.ContextVersionMinor, 6)
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
-	wnd, err := glfw.CreateWindow(Width, Height, "gui2one | GL engine | another one ? ... he should stop ", nil, nil)
+	wnd, err := glfw.CreateWindow(Width, Height, "muGL | a microui opengl backend", nil, nil)
 	if err != nil {
 		panic("Unable to create GLFW window")
 	}
