@@ -156,7 +156,6 @@ func main() {
 
 	InitGL()
 	myApp.InitGL(Width, Height)
-
 	myApp.InitMuContext(muCtx)
 
 	gl.Viewport(0, 0, int32(myApp.Width), int32(myApp.Height))

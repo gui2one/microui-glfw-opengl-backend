@@ -12,13 +12,13 @@ import (
 	"github.com/go-gl/gl/v4.6-core/gl"
 	mgl "github.com/go-gl/mathgl/mgl32"
 	"github.com/zeozeozeo/microui-go"
-	mu "github.com/zeozeozeo/microui-go"
 )
 
 var GLYPHS_RANGE = [2]int{0x0020, 0x007E}
 
 // App base app structure
 type App struct {
+	CTX                *microui.Context
 	MeshBuffer         *GlMeshData
 	MainShader         uint32
 	AtlasData          AG.AtlasData
@@ -71,8 +71,8 @@ func (a *App) InitGL(w int, h int) {
 }
 
 func (app *App) InitMuContext(ctx *microui.Context) {
+	app.CTX = ctx
 	myFontHandle := app.AtlasData
-
 	ctx.Style.Font = myFontHandle
 	ctx.TextHeight = app.TextHeight
 	ctx.TextWidth = app.TextWidth
@@ -230,9 +230,9 @@ func (app *App) Render(ctx *microui.Context) {
 				[3]float32{
 					float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
 
-		case mu.MU_COMMAND_ICON:
+		case microui.MU_COMMAND_ICON:
 			switch cmd.Icon.Id {
-			case mu.MU_ICON_CLOSE:
+			case microui.MU_ICON_CLOSE:
 				clr := cmd.Icon.Color.ToRGBA()
 				app.PushRect(
 					float32(cmd.Icon.Rect.X),
@@ -243,7 +243,7 @@ func (app *App) Render(ctx *microui.Context) {
 					[3]float32{
 						float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
 
-			case mu.MU_ICON_CHECK:
+			case microui.MU_ICON_CHECK:
 				clr := cmd.Icon.Color.ToRGBA()
 				app.PushRect(
 					float32(cmd.Icon.Rect.X),
@@ -253,7 +253,7 @@ func (app *App) Render(ctx *microui.Context) {
 					app.AtlasData.CheckedIcon,
 					[3]float32{
 						float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
-			case mu.MU_ICON_COLLAPSED:
+			case microui.MU_ICON_COLLAPSED:
 				clr := cmd.Icon.Color.ToRGBA()
 				app.PushRect(
 					float32(cmd.Icon.Rect.X),
@@ -263,7 +263,7 @@ func (app *App) Render(ctx *microui.Context) {
 					app.AtlasData.CollapsedIcon,
 					[3]float32{
 						float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
-			case mu.MU_ICON_EXPANDED:
+			case microui.MU_ICON_EXPANDED:
 				clr := cmd.Icon.Color.ToRGBA()
 				app.PushRect(
 					float32(cmd.Icon.Rect.X),
@@ -273,7 +273,7 @@ func (app *App) Render(ctx *microui.Context) {
 					app.AtlasData.ExpandedIcon,
 					[3]float32{
 						float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0})
-			case mu.MU_ICON_MAX:
+			case microui.MU_ICON_MAX:
 				clr := cmd.Icon.Color.ToRGBA()
 				app.PushRect(
 					float32(cmd.Icon.Rect.X),
