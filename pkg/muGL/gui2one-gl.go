@@ -17,14 +17,6 @@ import (
 
 var GLYPHS_RANGE = [2]int{0x0020, 0x007E}
 
-func InitGL() {
-
-	if gl.Init() != nil {
-		panic("Unable to initialize OpenGL")
-	}
-	SetupGLDebug()
-}
-
 // App base app structure
 type App struct {
 	MeshBuffer         *GlMeshData

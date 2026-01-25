@@ -68,6 +68,14 @@ func handleGLFWScroll(_ *glfw.Window, x, y float64) {
 	muEvents.SetScrollCallback(muCtx, x, y)
 }
 
+func InitGL() {
+
+	if gl.Init() != nil {
+		panic("Unable to initialize OpenGL")
+	}
+	muGL.SetupGLDebug()
+}
+
 func MainWindow() {
 
 	muGL.SliderWithLabel(muCtx, "Slider", &val1, 0.0, 10.0)
@@ -146,7 +154,7 @@ func main() {
 
 	muCtx = microui.NewContext()
 
-	muGL.InitGL()
+	InitGL()
 	myApp.InitGL(Width, Height)
 
 	myApp.InitMuContext(muCtx)
