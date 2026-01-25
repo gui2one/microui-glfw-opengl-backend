@@ -13,16 +13,15 @@ import (
 	"github.com/go-gl/gl/v4.6-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/zeozeozeo/microui-go"
-	mu "github.com/zeozeozeo/microui-go"
 )
 
 var myApp muGL.App
 var Width = 1280
-var Height = 600
-var MuCtx *microui.Context
-var Val1 float32 = 5
-var Text1 string = "text variable"
-var Bool1 bool = true
+var Height = 720
+var muCtx *microui.Context
+var val1 float32 = 5
+var text1 string = "text variable"
+var bool1 bool = true
 
 type AppWindow struct {
 	Name string
@@ -46,7 +45,7 @@ func handleGLFWResize(wnd *glfw.Window, width, height int) {
 	gl.Viewport(0, 0, int32(myApp.Width), int32(myApp.Height))
 }
 func handleGLFWCursorPos(wnd *glfw.Window, x, y float64) {
-	muEvents.SetCursorPosCallback(MuCtx, x, y)
+	muEvents.SetCursorPosCallback(muCtx, x, y)
 
 	action := wnd.GetMouseButton(glfw.MouseButton1)
 	if action == glfw.Press {
@@ -54,43 +53,43 @@ func handleGLFWCursorPos(wnd *glfw.Window, x, y float64) {
 	}
 }
 func handleGLFWMouseButton(wnd *glfw.Window, button glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
-	muEvents.SetMouseButtonCallback(MuCtx, wnd, button, action, mods)
+	muEvents.SetMouseButtonCallback(muCtx, wnd, button, action, mods)
 }
 func handleKeyDown(key int) {
 	fmt.Println(key)
 }
 func handleGLFWKey(wnd *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
-	muEvents.SetKeyCallback(MuCtx, key, scancode, action, mods)
+	muEvents.SetKeyCallback(muCtx, key, scancode, action, mods)
 }
 func handleGLFWChar(wnd *glfw.Window, char rune) {
-	muEvents.SetCharCallBack(MuCtx, char)
+	muEvents.SetCharCallBack(muCtx, char)
 }
 func handleGLFWScroll(_ *glfw.Window, x, y float64) {
-	muEvents.SetScrollCallback(MuCtx, x, y)
+	muEvents.SetScrollCallback(muCtx, x, y)
 }
 
 func MainWindow() {
 
-	muGL.SliderWithLabel(MuCtx, "Slider", &Val1, 0.0, 10.0)
+	muGL.SliderWithLabel(muCtx, "Slider", &val1, 0.0, 10.0)
 
-	MuCtx.LayoutRow(1, []int{-1}, 0)
-	MuCtx.Text("Ici ... du texte Ici ... du texte Ici ... du texte Ici ... du texte Ici ... du texte")
-	MuCtx.TextBox(&Text1)
-	MuCtx.Checkbox("Bool Value", &Bool1)
+	muCtx.LayoutRow(1, []int{-1}, 0)
+	muCtx.Text("Ici ... du texte Ici ... du texte Ici ... du texte Ici ... du texte Ici ... du texte")
+	muCtx.TextBox(&text1)
+	muCtx.Checkbox("Bool Value", &bool1)
 
-	if MuCtx.Header("Collapsible Header") {
-		MuCtx.Text("encore du texte")
-		MuCtx.PushID([]byte("id1"))
-		MuCtx.TextBox(&Text1)
-		MuCtx.PopID()
+	if muCtx.Header("Collapsible Header") {
+		muCtx.Text("encore du texte")
+		muCtx.PushID([]byte("id1"))
+		muCtx.TextBox(&text1)
+		muCtx.PopID()
 	}
 }
 func OptionsWindow() {
-	MuCtx.LayoutRow(1, []int{-1}, 0)
+	muCtx.LayoutRow(1, []int{-1}, 0)
 	for i := 0; i < 10; i++ {
-		MuCtx.PushID([]byte{byte(i)})
-		MuCtx.Slider(&Val1, 0.0, 10.0)
-		MuCtx.PopID()
+		muCtx.PushID([]byte{byte(i)})
+		muCtx.Slider(&val1, 0.0, 10.0)
+		muCtx.PopID()
 	}
 
 }
@@ -145,12 +144,12 @@ func main() {
 	// OpenGL Starts here !!
 	wnd.MakeContextCurrent()
 
-	MuCtx = microui.NewContext()
+	muCtx = microui.NewContext()
 
 	muGL.InitGL()
 	myApp.InitGL(Width, Height)
 
-	myApp.InitMuContext(MuCtx)
+	myApp.InitMuContext(muCtx)
 
 	gl.Viewport(0, 0, int32(myApp.Width), int32(myApp.Height))
 	glfw.SwapInterval(0)
@@ -160,25 +159,25 @@ func main() {
 		windowToMove := ""
 		glfw.WaitEvents()
 
-		MuCtx.Begin()
+		muCtx.Begin()
 
 		for i, w := range Windows {
-			if MuCtx.BeginWindow(w.Name, mu.NewRect((i+1)*150, (i+1)*150, 300, 650)) {
-				container := MuCtx.GetCurrentContainer()
+			if muCtx.BeginWindow(w.Name, microui.NewRect((i+1)*150, (i+1)*150, 300, 650)) {
+				container := muCtx.GetCurrentContainer()
 
-				if MuCtx.MousePressed == microui.MU_MOUSE_LEFT && MuCtx.HoverRoot == container {
+				if muCtx.MousePressed == microui.MU_MOUSE_LEFT && muCtx.HoverRoot == container {
 					windowToMove = w.Name
 				}
 				w.Draw()
-				MuCtx.EndWindow()
+				muCtx.EndWindow()
 			}
 		}
 
-		MuCtx.End()
+		muCtx.End()
 
 		gl.ClearColor(0.5, 0.1, 0.2, 1.0)
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-		myApp.Render(MuCtx)
+		myApp.Render(muCtx)
 
 		wnd.SwapBuffers()
 
