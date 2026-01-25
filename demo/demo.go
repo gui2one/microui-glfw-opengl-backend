@@ -16,17 +16,13 @@ import (
 )
 
 var myApp muGL.App
+var Windows []muGL.Window
 var Width = 1280
 var Height = 720
 var muCtx *microui.Context
 var val1 float32 = 5
 var text1 string = "text variable"
 var bool1 bool = true
-
-type AppWindow struct {
-	Name string
-	Draw func()
-}
 
 func handleGLFWDrop(wnd *glfw.Window, paths []string) {
 	fmt.Println("Dropped", len(paths), "files")
@@ -103,7 +99,7 @@ func OptionsWindow() {
 }
 
 // app window utils
-func moveToFront(name string, windows []AppWindow) []AppWindow {
+func moveToFront(name string, windows []muGL.Window) []muGL.Window {
 	for i, w := range windows {
 		if w.Name == name {
 			// Remove from current position
@@ -115,18 +111,30 @@ func moveToFront(name string, windows []AppWindow) []AppWindow {
 	return windows
 }
 func main() {
-	Windows := []AppWindow{
+	Windows = []muGL.Window{
 		{
-			Name: "Main",
-			Draw: MainWindow,
+			Name:   "Main",
+			Draw:   MainWindow,
+			X:      0,
+			Y:      0,
+			Width:  300,
+			Height: 400,
 		},
 		{
-			Name: "Options",
-			Draw: OptionsWindow,
+			Name:   "Options",
+			Draw:   OptionsWindow,
+			X:      100,
+			Y:      50,
+			Width:  300,
+			Height: 400,
 		},
 		{
-			Name: "Options2",
-			Draw: OptionsWindow,
+			Name:   "Options2",
+			Draw:   OptionsWindow,
+			X:      200,
+			Y:      100,
+			Width:  300,
+			Height: 400,
 		},
 	}
 	runtime.LockOSThread()
@@ -168,8 +176,8 @@ func main() {
 
 		muCtx.Begin()
 
-		for i, w := range Windows {
-			if muCtx.BeginWindow(w.Name, microui.NewRect((i+1)*150, (i+1)*150, 300, 650)) {
+		for _, w := range Windows {
+			if muCtx.BeginWindow(w.Name, microui.NewRect(w.X, w.Y, w.Width, w.Height)) {
 				container := muCtx.GetCurrentContainer()
 
 				if muCtx.MousePressed == microui.MU_MOUSE_LEFT && muCtx.HoverRoot == container {

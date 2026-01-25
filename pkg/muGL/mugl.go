@@ -16,6 +16,15 @@ import (
 
 var GLYPHS_RANGE = [2]int{0x0020, 0x007E}
 
+type Window struct {
+	Name   string
+	Draw   func()
+	X      int
+	Y      int
+	Width  int
+	Height int
+}
+
 // App base app structure
 type App struct {
 	CTX                *microui.Context
