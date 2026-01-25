@@ -60,7 +60,11 @@ type App struct {
 func (app *App) PutWindows() {
 	for _, w := range app.Windows {
 
-		if app.CTX.BeginWindowEx(w.Name, microui.NewRect(w.X, w.Y, w.Width, w.Height), w.Opts) != 0 {
+		if w.Opts&microui.MU_OPT_CLOSED != 0 {
+
+		}
+		state := app.CTX.BeginWindowEx(w.Name, microui.NewRect(w.X, w.Y, w.Width, w.Height), w.Opts)
+		if state != 0 {
 			container := app.CTX.GetCurrentContainer()
 
 			if app.CTX.MousePressed == microui.MU_MOUSE_LEFT && app.CTX.HoverRoot == container {
@@ -69,6 +73,7 @@ func (app *App) PutWindows() {
 			w.Draw()
 			app.CTX.EndWindow()
 		}
+
 	}
 }
 func (a *App) InitGL(w int, h int) {
