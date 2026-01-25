@@ -16,7 +16,7 @@ import (
 )
 
 var myApp muGL.App
-var Windows []muGL.Window
+
 var Width = 1280
 var Height = 720
 var muCtx *microui.Context
@@ -98,20 +98,8 @@ func OptionsWindow() {
 
 }
 
-// app window utils
-func moveToFront(name string, windows []muGL.Window) []muGL.Window {
-	for i, w := range windows {
-		if w.Name == name {
-			// Remove from current position
-			windows = append(windows[:i], windows[i+1:]...)
-			// Add to the end (top)
-			return append(windows, w)
-		}
-	}
-	return windows
-}
 func main() {
-	Windows = []muGL.Window{
+	myApp.Windows = []muGL.Window{
 		{
 			Name:   "Main",
 			Draw:   MainWindow,
@@ -171,36 +159,20 @@ func main() {
 
 	fmt.Println("MicroUI GL Backend")
 	for !wnd.ShouldClose() {
-		windowToMove := ""
+		myApp.CTX.Begin()
+
+		myApp.PutWindows()
+
+		myApp.CTX.End()
 		glfw.WaitEvents()
-
-		muCtx.Begin()
-
-		for _, w := range Windows {
-			if muCtx.BeginWindow(w.Name, microui.NewRect(w.X, w.Y, w.Width, w.Height)) {
-				container := muCtx.GetCurrentContainer()
-
-				if muCtx.MousePressed == microui.MU_MOUSE_LEFT && muCtx.HoverRoot == container {
-					windowToMove = w.Name
-				}
-				w.Draw()
-				muCtx.EndWindow()
-			}
-		}
-
-		muCtx.End()
 
 		gl.ClearColor(0.5, 0.1, 0.2, 1.0)
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-		myApp.Render(muCtx)
+
+		myApp.Render()
 
 		wnd.SwapBuffers()
 
-		if windowToMove != "" {
-			Windows = moveToFront(windowToMove, Windows)
-			windowToMove = ""
-			glfw.PostEmptyEvent()
-		}
 	}
 
 	glfw.Terminate()

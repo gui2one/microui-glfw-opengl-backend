@@ -127,19 +127,14 @@ func getFontMetrics(font *sfnt.Font, fontSize int) *FontMetrics {
 func getGlyphMetrics(font *sfnt.Font, glyphIndex sfnt.GlyphIndex, segs sfnt.Segments, fontSize int) *GlyphMetrics {
 	buf := new(sfnt.Buffer)
 
-	// 1. Calculate scale (assuming 72 DPI for simplicity, or pass DPI as a param)
 	// fixed.I(x) is shorthand for x << 6
 	scale := fixed.I(fontSize)
 
-	// 2. Get Advance
 	adv, _ := font.GlyphAdvance(buf, glyphIndex, scale, _font.HintingNone)
 
-	// 3. Get Bounds once
 	bounds := segs.Bounds()
 
-	// 4. Calculate dimensions using Ceil/Floor appropriately
-	// Use Floor for Min and Ceil for Max to ensure the glyph fits
-	// entirely within the integer pixel boundaries.
+	// 4. Calculate dimensions
 	minX, maxX := bounds.Min.X.Floor(), bounds.Max.X.Ceil()
 	minY, maxY := bounds.Min.Y.Floor(), bounds.Max.Y.Ceil()
 
@@ -164,16 +159,15 @@ func rasterizeGlyph(font *sfnt.Font, idx sfnt.GlyphIndex, fontSize int) (*image.
 	}
 
 	glypMetrics := getGlyphMetrics(font, idx, segs, fontSize)
-	// 1. Get the metrics in floating point
+
 	fAscent := float32(metrics.Ascent.Ceil())
 	fDescent := float32(metrics.Descent.Ceil()) // Distance below baseline
 
-	// 2. The height of the font 'line' is actually:
 	totalLineHeight := fAscent + fDescent
 
 	offsetX := float32(0.0)
 	offsetY := fAscent
-	// offsetY := float32(0.0)
+
 	canvasWidth := fontSize
 	canvasHeight := int(math.Ceil(float64(totalLineHeight))) + 1
 	r := vector.NewRasterizer(canvasWidth, canvasHeight)
@@ -256,6 +250,7 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int, fontSize int) *Atlas
 
 	cellStepX := float32(fontSize) / float32(finalWidth)
 	cellStepY := float32(fontSize) / float32(finalHeight)
+
 	// draw black cell into Atlas
 	draw.Draw(finalIMG, image.Rect(0, 0, stepX, stepY), image.Black, image.Point{}, draw.Src)
 	result.Black = Rect{
@@ -286,9 +281,6 @@ func GenerateAtlas(fontFilePath string, glyphsRange [2]int, fontSize int) *Atlas
 	result.CollapsedIcon = addIconToAtlas("assets/icons/collapsed.png", finalIMG, fontSize, cellStepX, cellStepY, 4, 0)
 	result.ExpandedIcon = addIconToAtlas("assets/icons/expanded.png", finalIMG, fontSize, cellStepX, cellStepY, 5, 0)
 
-	// for i, img := range images {
-	// 	SaveRGBAToPNG(img, fmt.Sprintf("%v/%v", "aaa", i))
-	// }
 	for i, img := range images {
 		dstRect := image.Rect(
 			int(startX),
@@ -370,9 +362,8 @@ func getMaxBounds(font *sfnt.Font, fontSize int, glypRange [2]int) (int, int) {
 		log.Fatal(err)
 	}
 
-	// fmt.Println("Ascent , Descent  : ", fm.Ascent.Ceil(), fm.Descent.Ceil())
 	maxH = int(fm.Ascent.Ceil() + fm.Descent.Ceil())
-	// fmt.Println(maxW, maxH)
+
 	return maxW, maxH
 }
 func SaveAtlasToPNG(atlas *AtlasData) {

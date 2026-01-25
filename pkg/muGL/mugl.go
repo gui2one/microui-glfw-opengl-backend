@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/go-gl/gl/v4.6-core/gl"
+	"github.com/go-gl/glfw/v3.3/glfw"
 	mgl "github.com/go-gl/mathgl/mgl32"
 	"github.com/zeozeozeo/microui-go"
 )
@@ -25,6 +26,18 @@ type Window struct {
 	Height int
 }
 
+func moveToFront(name string, windows []Window) []Window {
+	for i, w := range windows {
+		if w.Name == name {
+			// Remove from current position
+			windows = append(windows[:i], windows[i+1:]...)
+			// Add to the end (top)
+			return append(windows, w)
+		}
+	}
+	return windows
+}
+
 // App base app structure
 type App struct {
 	CTX                *microui.Context
@@ -37,8 +50,25 @@ type App struct {
 
 	Width  int
 	Height int
+
+	// utils
+	windowToMove string
+	Windows      []Window
 }
 
+func (app *App) PutWindows() {
+	for _, w := range app.Windows {
+		if app.CTX.BeginWindow(w.Name, microui.NewRect(w.X, w.Y, w.Width, w.Height)) {
+			container := app.CTX.GetCurrentContainer()
+
+			if app.CTX.MousePressed == microui.MU_MOUSE_LEFT && app.CTX.HoverRoot == container {
+				app.windowToMove = w.Name
+			}
+			w.Draw()
+			app.CTX.EndWindow()
+		}
+	}
+}
 func (a *App) InitGL(w int, h int) {
 	a.Width = w
 	a.Height = h
@@ -81,6 +111,8 @@ func (a *App) InitGL(w int, h int) {
 
 func (app *App) InitMuContext(ctx *microui.Context) {
 	app.CTX = ctx
+	app.windowToMove = ""
+
 	myFontHandle := app.AtlasData
 	ctx.Style.Font = myFontHandle
 	ctx.TextHeight = app.TextHeight
@@ -210,11 +242,12 @@ func (app *App) SetScissor(r microui.Rect) {
 	gl.Enable(gl.SCISSOR_TEST)
 }
 
-func (app *App) Render(ctx *microui.Context) {
+func (app *App) Render() {
+
 	PrepareGLobalState(app)
 	app.ClearRects()
 	gl.Disable(gl.SCISSOR_TEST) // Start with no scissor
-	for _, cmd := range ctx.CommandList {
+	for _, cmd := range app.CTX.CommandList {
 		switch cmd.Type {
 		case microui.MU_COMMAND_CLIP:
 			FlushRects(app)
@@ -298,6 +331,12 @@ func (app *App) Render(ctx *microui.Context) {
 	}
 
 	FlushRects(app)
+
+	if app.windowToMove != "" {
+		app.Windows = moveToFront(app.windowToMove, app.Windows)
+		app.windowToMove = ""
+		glfw.PostEmptyEvent()
+	}
 }
 
 type GlMeshData struct {
