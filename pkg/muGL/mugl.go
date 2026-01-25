@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/go-gl/gl/v4.6-core/gl"
-	"github.com/go-gl/glfw/v3.3/glfw"
 	mgl "github.com/go-gl/mathgl/mgl32"
 	"github.com/zeozeozeo/microui-go"
 )
@@ -24,9 +23,11 @@ type Window struct {
 	Y      int
 	Width  int
 	Height int
+
+	Opts int
 }
 
-func moveToFront(name string, windows []Window) []Window {
+func MoveToFront(name string, windows []Window) []Window {
 	for i, w := range windows {
 		if w.Name == name {
 			// Remove from current position
@@ -52,17 +53,18 @@ type App struct {
 	Height int
 
 	// utils
-	windowToMove string
+	WindowToMove string
 	Windows      []Window
 }
 
 func (app *App) PutWindows() {
 	for _, w := range app.Windows {
-		if app.CTX.BeginWindow(w.Name, microui.NewRect(w.X, w.Y, w.Width, w.Height)) {
+
+		if app.CTX.BeginWindowEx(w.Name, microui.NewRect(w.X, w.Y, w.Width, w.Height), w.Opts) != 0 {
 			container := app.CTX.GetCurrentContainer()
 
 			if app.CTX.MousePressed == microui.MU_MOUSE_LEFT && app.CTX.HoverRoot == container {
-				app.windowToMove = w.Name
+				app.WindowToMove = w.Name
 			}
 			w.Draw()
 			app.CTX.EndWindow()
@@ -111,7 +113,7 @@ func (a *App) InitGL(w int, h int) {
 
 func (app *App) InitMuContext(ctx *microui.Context) {
 	app.CTX = ctx
-	app.windowToMove = ""
+	app.WindowToMove = ""
 
 	myFontHandle := app.AtlasData
 	ctx.Style.Font = myFontHandle
@@ -332,11 +334,6 @@ func (app *App) Render() {
 
 	FlushRects(app)
 
-	if app.windowToMove != "" {
-		app.Windows = moveToFront(app.windowToMove, app.Windows)
-		app.windowToMove = ""
-		glfw.PostEmptyEvent()
-	}
 }
 
 type GlMeshData struct {

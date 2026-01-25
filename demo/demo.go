@@ -159,12 +159,19 @@ func main() {
 
 	fmt.Println("MicroUI GL Backend")
 	for !wnd.ShouldClose() {
+
+		glfw.WaitEvents()
 		myApp.CTX.Begin()
 
 		myApp.PutWindows()
 
 		myApp.CTX.End()
-		glfw.WaitEvents()
+
+		if myApp.WindowToMove != "" {
+			myApp.Windows = muGL.MoveToFront(myApp.WindowToMove, myApp.Windows)
+			myApp.WindowToMove = ""
+			glfw.PostEmptyEvent()
+		}
 
 		gl.ClearColor(0.5, 0.1, 0.2, 1.0)
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
