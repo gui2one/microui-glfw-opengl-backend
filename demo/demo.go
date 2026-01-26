@@ -17,6 +17,7 @@ import (
 
 var myApp muGL.App
 
+var ShowMainWindow = true
 var Width = 1280
 var Height = 720
 var muCtx *microui.Context
@@ -56,6 +57,17 @@ func handleKeyDown(key int) {
 }
 func handleGLFWKey(wnd *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
 	muEvents.SetKeyCallback(muCtx, key, scancode, action, mods)
+	if action == glfw.Press {
+		switch key {
+		case glfw.KeySpace:
+
+			for i := range myApp.Windows {
+				w := &myApp.Windows[i]
+				w.Closed = false
+				fmt.Println(w.Closed)
+			}
+		}
+	}
 }
 func handleGLFWChar(wnd *glfw.Window, char rune) {
 	muEvents.SetCharCallBack(muCtx, char)
@@ -169,6 +181,7 @@ func main() {
 
 		if myApp.WindowToMove != "" {
 			myApp.Windows = muGL.MoveToFront(myApp.WindowToMove, myApp.Windows)
+
 			myApp.WindowToMove = ""
 			glfw.PostEmptyEvent()
 		}
