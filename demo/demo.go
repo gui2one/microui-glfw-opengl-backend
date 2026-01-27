@@ -62,9 +62,6 @@ func handleGLFWKey(wnd *glfw.Window, key glfw.Key, scancode int, action glfw.Act
 		case glfw.KeySpace:
 
 			for i := range myApp.Windows {
-				// Direct access to ensure we aren't editing a copy
-				myApp.Windows[i].Closed = false
-
 				container := myApp.CTX.GetContainer(myApp.Windows[i].Name)
 				if container != nil {
 					container.Open = true // Force the internal container to be open

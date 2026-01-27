@@ -24,8 +24,7 @@ type Window struct {
 	Width  int
 	Height int
 
-	Opts   int
-	Closed bool
+	Opts int
 }
 
 func MoveToFront(name string, windows []*Window) []*Window {
@@ -62,24 +61,17 @@ func (app *App) PutWindows() {
 	for i := range app.Windows {
 		w := app.Windows[i]
 
-		if w.Closed {
-			continue
-		}
-
-		// state := app.CTX.BeginWindow(w.Name, microui.NewRect(w.X, w.Y, w.Width, w.Height))
 		opt := w.Opts
-		state := app.CTX.BeginWindowEx(w.Name, microui.NewRect(w.X, w.Y, w.Width, w.Height), opt)
-		if state == 0 {
-			w.Closed = true
-			continue
-		}
-		container := app.CTX.GetCurrentContainer()
+		if app.CTX.BeginWindowEx(w.Name, microui.NewRect(w.X, w.Y, w.Width, w.Height), opt) != 0 {
 
-		if app.CTX.MousePressed == microui.MU_MOUSE_LEFT && app.CTX.HoverRoot == container {
-			app.WindowToMove = w.Name
+			container := app.CTX.GetCurrentContainer()
+
+			if app.CTX.MousePressed == microui.MU_MOUSE_LEFT && app.CTX.HoverRoot == container {
+				app.WindowToMove = w.Name
+			}
+			w.Draw()
+			app.CTX.EndWindow()
 		}
-		w.Draw()
-		app.CTX.EndWindow()
 
 	}
 }
