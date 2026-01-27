@@ -28,7 +28,7 @@ type Window struct {
 	Closed bool
 }
 
-func MoveToFront(name string, windows []Window) []Window {
+func MoveToFront(name string, windows []*Window) []*Window {
 	for i, w := range windows {
 		if w.Name == name {
 			// Remove from current position
@@ -55,19 +55,19 @@ type App struct {
 
 	// utils
 	WindowToMove string
-	Windows      []Window
+	Windows      []*Window
 }
 
 func (app *App) PutWindows() {
 	for i := range app.Windows {
-		w := &(app.Windows[i])
+		w := app.Windows[i]
+
 		if w.Closed {
-			fmt.Println("Window", w.Name, "is closed")
 			continue
 		}
 
 		// state := app.CTX.BeginWindow(w.Name, microui.NewRect(w.X, w.Y, w.Width, w.Height))
-		opt := w.Opts & microui.MU_OPT_CLOSED
+		opt := w.Opts
 		state := app.CTX.BeginWindowEx(w.Name, microui.NewRect(w.X, w.Y, w.Width, w.Height), opt)
 		if state == 0 {
 			w.Closed = true
