@@ -176,6 +176,7 @@ func main() {
 		glfw.WaitEvents()
 		myApp.CTX.Begin()
 
+		myApp.MenuBar()
 		myApp.PutWindows()
 
 		myApp.CTX.End()
